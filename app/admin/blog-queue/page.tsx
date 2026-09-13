@@ -46,8 +46,8 @@ export default function BlogQueue() {
       
       // Sort newest first
       fetchedPosts.sort((a, b) => {
-        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime();
-        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime();
+        const dateA = (a.createdAt as any)?.toDate ? (a.createdAt as any).toDate().getTime() : new Date(a.createdAt).getTime();
+        const dateB = (b.createdAt as any)?.toDate ? (b.createdAt as any).toDate().getTime() : new Date(b.createdAt).getTime();
         return dateB - dateA;
       });
       
@@ -137,8 +137,8 @@ export default function BlogQueue() {
                       )}
                       <span>&bull;</span>
                       <span>
-                        {post.createdAt?.toDate 
-                          ? post.createdAt.toDate().toLocaleDateString() 
+                        {(post.createdAt as any)?.toDate 
+                          ? (post.createdAt as any).toDate().toLocaleDateString() 
                           : new Date(post.createdAt).toLocaleDateString()}
                       </span>
                     </div>
