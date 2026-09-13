@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { Leaf, Search, Menu } from 'lucide-react'
+import { Search, Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation';
 
 export function Header() {
@@ -11,7 +12,9 @@ export function Header() {
     <header className="site-header">
       <div className="nav-wrap">
         <Link href="/blog" className="brand">
-          <span className="brand-mark"><Leaf size={18}/></span>
+          <span className="brand-mark">
+            <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
+          </span>
           <span>UDAWALAWE<br/><em>WILD</em></span>
         </Link>
         <nav>
