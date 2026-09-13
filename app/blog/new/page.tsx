@@ -7,14 +7,8 @@ import { db, auth } from '@/lib/firebase'
 import { Editor } from '@/components/Editor'
 import { ImageUpload } from '@/components/ImageUpload'
 import { StarRating } from '@/components/StarRating'
-import { ChevronLeft, Send, Upload } from 'lucide-react'
+import { ChevronLeft, Send } from 'lucide-react'
 import Link from 'next/link'
-
-// MOCK USER for testing purposes
-const MOCK_USER = {
-  uid: 'test-user-123',
-  displayName: 'Jane Doe'
-}
 
 type PostType = 'Blog Post' | 'Review'
 
@@ -61,6 +55,13 @@ export default function NewStory() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const currentUser = auth.currentUser
+    if (!currentUser) {
+      setError('You must be signed in to submit a story.')
+      return
+    }
+
     if (!title.trim() || !content.trim() || (type === 'Review' && rating === 0)) {
       setError('Please fill in all required fields.')
       return
@@ -72,20 +73,18 @@ export default function NewStory() {
 
     try {
       const adminUid = process.env.NEXT_PUBLIC_ADMIN_UID
-      const isAdmin = auth.currentUser?.uid === adminUid
-      const userRef = doc(db, 'users', auth.currentUser?.uid || MOCK_USER.uid)
+      const isAdmin = currentUser.uid === adminUid
+      const userRef = doc(db, 'users', currentUser.uid)
       const now = new Date()
 
-      // 1. Check rate limit
+      // 1. Check rate limit (skip for admins)
       if (!isAdmin) {
         const userSnap = await getDoc(userRef)
-        
         if (userSnap.exists()) {
           const userData = userSnap.data()
           if (userData.lastPostAt) {
             const lastPost = userData.lastPostAt.toDate()
             const hoursSinceLastPost = (now.getTime() - lastPost.getTime()) / (1000 * 60 * 60)
-            
             if (hoursSinceLastPost < 24) {
               throw new Error(`You can only submit one post every 24 hours. Please wait ${Math.ceil(24 - hoursSinceLastPost)} more hours.`)
             }
@@ -100,11 +99,11 @@ export default function NewStory() {
         imageUrls = await uploadImagesToCloudinary(images)
       }
 
-      // 3. Write post to Firestore
+      // 3. Write post to Firestore with real user data
       setProgress('Saving post...')
       const postData = {
-        authorId: MOCK_USER.uid,
-        authorName: MOCK_USER.displayName,
+        authorId: currentUser.uid,
+        authorName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
         title,
         body: content,
         images: imageUrls,
@@ -119,7 +118,11 @@ export default function NewStory() {
 
       // 4. Update user's lastPostAt
       setProgress('Finalizing...')
-      await setDoc(userRef, { lastPostAt: now }, { merge: true })
+      await setDoc(userRef, {
+        lastPostAt: now,
+        displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        email: currentUser.email,
+      }, { merge: true })
 
       router.push('/blog/success')
       
