@@ -12,7 +12,7 @@ export default function SuccessPage() {
           You'll see it on the blog once approved.
         </p>
         <Link 
-          href="/blog" 
+          href="/" 
           className="dark-button !inline-flex justify-center items-center gap-2 px-6 py-3"
         >
           Return to blog feed <ArrowRight size={16} />

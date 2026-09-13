@@ -95,7 +95,7 @@ export default function NewStory() {
   return (
     <main className="new-page">
       <div className="new-top">
-        <Link href="/blog" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Cancel</Link>
+        <Link href="/" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Cancel</Link>
         <span className="save-status">Stories are reviewed before publishing.</span>
       </div>
 

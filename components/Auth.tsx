@@ -63,7 +63,7 @@ export function Auth({ signup }: { signup?: boolean }) {
         </div>
       </div>
       <div className="auth-form">
-        <Link href="/blog" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back to stories</Link>
+        <Link href="/" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back to stories</Link>
         <div className="form-inner">
           <p className="eyebrow">{signup ? 'Become a contributor' : 'Welcome back'}</p>
           <h1>{signup ? <>Make room for<br/><i>the wild.</i></> : <>Good to see<br/><i>you again.</i></>}</h1>

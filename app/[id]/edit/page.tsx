@@ -165,7 +165,7 @@ export default function EditStory() {
       <div className="min-h-screen bg-[#f5f5f0] flex flex-col items-center justify-center p-4">
         <h1 className="text-4xl font-serif text-[#324b37] mb-6">Error</h1>
         <p className="text-lg text-[#526356] max-w-lg text-center mb-6">{error}</p>
-        <Link href="/blog" className="border border-[#304936] text-[#304936] px-6 py-3 hover:bg-[#304936] hover:text-white transition-colors">
+        <Link href="/" className="border border-[#304936] text-[#304936] px-6 py-3 hover:bg-[#304936] hover:text-white transition-colors">
           Go back to journal
         </Link>
       </div>

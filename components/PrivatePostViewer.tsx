@@ -79,7 +79,7 @@ export function PrivatePostViewer({ id }: { id: string }) {
         <p className="text-[#526356] mb-8 max-w-md">
           This story may have been deleted, or it is private and you do not have permission to view it.
         </p>
-        <Link href="/blog" className="pill-button !inline-flex items-center gap-2">
+        <Link href="/" className="pill-button !inline-flex items-center gap-2">
           <ChevronLeft size={16}/> Back to stories
         </Link>
       </main>

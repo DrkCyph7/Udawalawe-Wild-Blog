@@ -34,17 +34,17 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="nav-wrap">
-        <Link href="/blog" className="brand">
+        <Link href="/" className="brand">
           <span className="brand-mark">
             <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
           </span>
           <span>UDAWALAWE<br/><em>WILD</em></span>
         </Link>
         <nav>
-          <Link href="/blog" className={pathname === '/blog' ? 'active' : ''}>Stories</Link>
-          <Link href="/blog/new" className={pathname === '/blog/new' ? 'active' : ''}>Share a story</Link>
+          <Link href="/" className={pathname === '/' ? 'active' : ''}>Stories</Link>
+          <Link href="/new" className={pathname === '/new' ? 'active' : ''}>Share a story</Link>
           {isAdmin && (
-            <Link href="/blog/admin" className={pathname === '/blog/admin' ? 'active' : ''}>Admin</Link>
+            <Link href="/admin" className={pathname === '/admin' ? 'active' : ''}>Admin</Link>
           )}
         </nav>
         <div className="nav-actions">
@@ -61,8 +61,8 @@ export function Header() {
             </div>
           ) : (
             <>
-              <Link href="/blog/login" className="text-link">Sign in</Link>
-              <Link href="/blog/signup" className="pill-button small !inline-flex items-center justify-center">Join</Link>
+              <Link href="/login" className="text-link">Sign in</Link>
+              <Link href="/signup" className="pill-button small !inline-flex items-center justify-center">Join</Link>
             </>
           )}
           <button className="menu-button" aria-label="Menu"><Menu size={20}/></button>

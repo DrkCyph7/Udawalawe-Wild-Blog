@@ -19,7 +19,7 @@ export function PostDetailView({ post }: { post: BlogPost }) {
 
   return (
     <main className="post-detail">
-      <Link href="/blog" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back to all stories</Link>
+      <Link href="/" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back to all stories</Link>
 
       <div className="detail-header">
         <div>
@@ -95,7 +95,7 @@ export function PostDetailView({ post }: { post: BlogPost }) {
         <aside className="review-card">
           <h3>Have you been here?</h3>
           <p>Share your experience with fellow explorers.</p>
-          <Link href="/blog/new" className="dark-button full !inline-flex justify-center items-center gap-2">
+          <Link href="/new" className="dark-button full !inline-flex justify-center items-center gap-2">
             Write a review <Pencil size={15}/>
           </Link>
           {post.type === 'Review' && post.rating !== undefined && (
