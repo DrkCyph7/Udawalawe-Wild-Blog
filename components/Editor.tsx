@@ -3,7 +3,7 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
-import { Bold, Italic, List, Link as LinkIcon } from 'lucide-react'
+import { Bold, Italic, List, Link as LinkIcon, Heading2, Heading3, Quote, ListOrdered, Strikethrough } from 'lucide-react'
 import { useCallback } from 'react'
 
 interface EditorProps {
@@ -23,6 +23,7 @@ export function Editor({ content, onChange }: EditorProps) {
       }),
     ],
     content,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
@@ -53,37 +54,33 @@ export function Editor({ content, onChange }: EditorProps) {
     return null
   }
 
+  const ToolbarButton = ({ onClick, active, icon: Icon, title }: any) => (
+    <button
+      type="button"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      title={title}
+      className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] transition-colors ${active ? 'bg-[#e2dfd5]' : ''}`}
+    >
+      <Icon size={16} />
+    </button>
+  )
+
   return (
     <div className="w-full">
-      <div className="flex items-center gap-1 p-2 border border-[#e2dfd5] border-b-0 rounded-t-md bg-[#f9f8f4]">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('bold') ? 'bg-[#e2dfd5]' : ''}`}
-        >
-          <Bold size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('italic') ? 'bg-[#e2dfd5]' : ''}`}
-        >
-          <Italic size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('bulletList') ? 'bg-[#e2dfd5]' : ''}`}
-        >
-          <List size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={setLink}
-          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('link') ? 'bg-[#e2dfd5]' : ''}`}
-        >
-          <LinkIcon size={16} />
-        </button>
+      <div className="flex flex-wrap items-center gap-1 p-2 border border-[#e2dfd5] border-b-0 rounded-t-md bg-[#f9f8f4]">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} icon={Bold} title="Bold" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} icon={Italic} title="Italic" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} icon={Strikethrough} title="Strikethrough" />
+        <div className="w-px h-5 bg-[#d6d2c4] mx-1" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} icon={Heading2} title="Heading 2" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} icon={Heading3} title="Heading 3" />
+        <div className="w-px h-5 bg-[#d6d2c4] mx-1" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} icon={List} title="Bullet List" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} icon={ListOrdered} title="Ordered List" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} icon={Quote} title="Quote" />
+        <div className="w-px h-5 bg-[#d6d2c4] mx-1" />
+        <ToolbarButton onClick={setLink} active={editor.isActive('link')} icon={LinkIcon} title="Link" />
       </div>
       <EditorContent editor={editor} className="editor-content bg-white text-[#4f5b51] border-[#e2dfd5]" />
     </div>
