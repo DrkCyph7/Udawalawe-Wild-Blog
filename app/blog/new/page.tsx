@@ -117,7 +117,6 @@ export default function NewStory() {
             onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
             placeholder={type === 'Blog Post' ? 'Give your story a title' : 'Search destinations or enter a title'}
             required
-            className="w-full text-xl p-4 border border-[#e2dfd5] rounded-md focus:outline-none bg-[#f9f8f4] text-[#2a362d]"
           />
         </label>
 
