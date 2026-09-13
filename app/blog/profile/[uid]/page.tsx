@@ -6,6 +6,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { BlogCard } from '@/components/BlogCard'
 import { ProfileEditLink } from '@/components/ProfileEditLink'
+import { ProfileTabs } from '@/components/ProfileTabs'
 
 type Props = { params: Promise<{ uid: string }> }
 
@@ -38,7 +39,8 @@ export default async function ProfilePage({ params }: Props) {
   const q = query(
     collection(db, 'posts'),
     where('authorId', '==', uid),
-    where('status', '==', 'approved')
+    where('status', '==', 'approved'),
+    where('visibility', '==', 'public')
   )
   const snapshot = await getDocs(q)
   const posts: BlogPost[] = snapshot.docs
@@ -98,19 +100,7 @@ export default async function ProfilePage({ params }: Props) {
         </div>
       </div>
 
-      <div className="profile-body">
-        {posts.length === 0 ? (
-          <div className="profile-empty">
-            <p>No public stories yet.</p>
-          </div>
-        ) : (
-          <div className="post-grid">
-            {posts.map(post => (
-              <BlogCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </div>
+      <ProfileTabs uid={uid} initialPublicPosts={posts} />
     </main>
   )
 }
