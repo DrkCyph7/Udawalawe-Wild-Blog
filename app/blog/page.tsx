@@ -1,55 +1,69 @@
 import { ArrowRight, Camera } from 'lucide-react'
 import { BlogCard } from '@/components/BlogCard'
-import { LoadMore } from '@/components/LoadMore'
 import Link from 'next/link'
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { BlogPost } from '@/lib/types'
+import { SortControl } from '@/components/SortControl'
 
-export const dynamic = 'force-dynamic' // Ensure this page runs dynamically for fresh posts, or could revalidate
+export const dynamic = 'force-dynamic'
 
-export default async function BlogListingPage() { 
-  let initialPosts: BlogPost[] = [];
-  let initialLastDate: string | null = null;
+export default async function BlogListingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>
+}) {
+  const { sort = 'newest' } = await searchParams
+  let initialPosts: BlogPost[] = []
 
   try {
-    // To avoid requiring a composite index in Firestore for status + createdAt,
-    // we query by status, and sort in memory. 
     const q = query(
       collection(db, 'posts'),
       where('status', '==', 'approved')
-    );
+    )
 
-    const querySnapshot = await getDocs(q);
-    const allApprovedPosts = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        authorId: data.authorId,
-        authorName: data.authorName,
-        title: data.title,
-        body: data.body,
-        images: data.images || [],
-        type: data.type,
-        rating: data.rating,
-        status: data.status,
-        createdAt: data.createdAt?.toDate().toISOString(),
-        updatedAt: data.updatedAt?.toDate().toISOString(),
-      } as BlogPost;
-    });
+    const querySnapshot = await getDocs(q)
+    initialPosts = querySnapshot.docs
+      .map(d => {
+        const data = d.data()
+        return {
+          id: d.id,
+          authorId: data.authorId,
+          authorName: data.authorName,
+          isAnonymous: data.isAnonymous ?? false,
+          visibility: data.visibility ?? 'public',
+          title: data.title,
+          body: data.body,
+          images: data.images || [],
+          type: data.type,
+          rating: data.rating,
+          status: data.status,
+          likes: data.likes ?? 0,
+          likedBy: data.likedBy ?? [],
+          reportCount: data.reportCount ?? 0,
+          reportedBy: data.reportedBy ?? [],
+          createdAt: data.createdAt?.toDate().toISOString(),
+          updatedAt: data.updatedAt?.toDate().toISOString(),
+        } as BlogPost
+      })
+      // Exclude deleted and private
+      .filter(p => p.status !== 'deleted' && p.visibility !== 'private')
 
-    // Sort descending by createdAt
-    allApprovedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    // Take the first 6
-    initialPosts = allApprovedPosts.slice(0, 6);
-
-    if (initialPosts.length > 0) {
-      initialLastDate = initialPosts[initialPosts.length - 1].createdAt;
+    // Sort in memory (avoids needing composite indexes)
+    if (sort === 'liked') {
+      initialPosts.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
+    } else if (sort === 'rated') {
+      initialPosts = initialPosts.filter(p => p.type === 'Review' && p.rating !== undefined)
+      initialPosts.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    } else {
+      initialPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }
   } catch (error) {
-    console.error("Error fetching initial blog posts:", error);
+    console.error('Error fetching blog posts:', error)
   }
+
+  const featured = initialPosts[0] || null
+  const rest = initialPosts.slice(1)
 
   return (
     <>
@@ -61,41 +75,43 @@ export default async function BlogListingPage() {
           <a href="#stories" className="outline-button">Explore the stories <ArrowRight size={16}/></a>
         </div>
         <div className="hero-image">
-          <img src="https://images.unsplash.com/photo-1535338454770-8be927b5a00b?auto=format&fit=crop&w=1200&q=85" alt="Elephant walking through a Sri Lankan landscape"/>
-          <div className="image-caption"><Camera size={14}/> Udawalawe National Park · Sri Lanka</div>
+          <img src="https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=85" alt="Elephant in Udawalawe"/>
         </div>
       </section>
-      <main id="stories" className="listing">
+
+      <section className="listing" id="stories">
         <div className="section-heading">
-          <div><p className="eyebrow">The journal</p><h2>Latest stories</h2></div>
-          <div className="filters">
-            <button className="filter active">All stories</button>
-            <button className="filter">Wildlife</button>
-            <button className="filter">Travel tips</button>
-            <button className="filter">Conservation</button>
+          <div>
+            <p className="eyebrow"><span className="eyebrow-line"/> Community stories</p>
+            <h2>From the <i>field.</i></h2>
           </div>
+          <SortControl currentSort={sort} />
         </div>
+
         <div className="post-grid">
-          {initialPosts.length > 0 ? (
-            <>
-              {initialPosts.map(post => <BlogCard key={post.id} post={post} />)}
-              <LoadMore initialLastDate={initialLastDate} />
-            </>
-          ) : (
-            <div className="col-span-full py-12 text-center text-zinc-500">
-              No stories published yet.
+          {initialPosts.length === 0 ? (
+            <div className="col-span-full py-20 text-center">
+              <p className="text-[#768078] font-serif text-lg">No stories yet. Be the first to share!</p>
+              <Link href="/blog/new" className="dark-button !inline-flex mt-6">
+                Share a story <Camera size={15}/>
+              </Link>
             </div>
+          ) : (
+            initialPosts.map(post => <BlogCard key={post.id} post={post} />)
           )}
         </div>
-        <div className="join-banner">
-          <div>
-            <p className="eyebrow">Your turn</p>
-            <h3>Seen something<br/><i>worth sharing?</i></h3>
-          </div>
-          <p>Every story helps us see this place a little more clearly. Share your field notes with the community.</p>
-          <Link href="/blog/new" className="dark-button !inline-flex items-center gap-2">Share a story <ArrowRight size={16}/></Link>
+      </section>
+
+      <section className="join-banner">
+        <div>
+          <p className="eyebrow"><span className="eyebrow-line"/> Become a contributor</p>
+          <h2>Have a story<br/><i>to tell?</i></h2>
         </div>
-      </main>
+        <p>Share what you saw. Your field notes help others plan mindful visits and deepen their connection with this extraordinary place.</p>
+        <Link href="/blog/new" className="pill-button !inline-flex items-center gap-2">
+          Share a story <ArrowRight size={15}/>
+        </Link>
+      </section>
     </>
-  ) 
+  )
 }
