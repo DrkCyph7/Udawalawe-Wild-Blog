@@ -55,37 +55,37 @@ export function Editor({ content, onChange }: EditorProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-1 p-2 border border-b-0 rounded-t-md bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center gap-1 p-2 border border-[#e2dfd5] border-b-0 rounded-t-md bg-[#f9f8f4]">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 ${editor.isActive('bold') ? 'bg-zinc-200 dark:bg-zinc-800' : ''}`}
+          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('bold') ? 'bg-[#e2dfd5]' : ''}`}
         >
           <Bold size={16} />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 ${editor.isActive('italic') ? 'bg-zinc-200 dark:bg-zinc-800' : ''}`}
+          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('italic') ? 'bg-[#e2dfd5]' : ''}`}
         >
           <Italic size={16} />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 ${editor.isActive('bulletList') ? 'bg-zinc-200 dark:bg-zinc-800' : ''}`}
+          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('bulletList') ? 'bg-[#e2dfd5]' : ''}`}
         >
           <List size={16} />
         </button>
         <button
           type="button"
           onClick={setLink}
-          className={`p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800 ${editor.isActive('link') ? 'bg-zinc-200 dark:bg-zinc-800' : ''}`}
+          className={`p-2 rounded hover:bg-[#e2dfd5] text-[#2a362d] ${editor.isActive('link') ? 'bg-[#e2dfd5]' : ''}`}
         >
           <LinkIcon size={16} />
         </button>
       </div>
-      <EditorContent editor={editor} className="editor-content bg-white dark:bg-black text-black dark:text-white" />
+      <EditorContent editor={editor} className="editor-content bg-white text-[#4f5b51] border-[#e2dfd5]" />
     </div>
   )
 }
