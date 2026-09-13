@@ -6,24 +6,7 @@ import { Footer } from '@/components/Footer'
 export const metadata: Metadata = {
   title: 'Udawalawe Wild — Stories from the Wild',
   description: 'A community journal for curious travelers, devoted naturalists, and everyone who feels at home under an open sky.',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
+    generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
