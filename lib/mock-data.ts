@@ -1,0 +1,8 @@
+export type Post = { id: string; title: string; excerpt: string; category: string; author: string; date: string; read: string; image: string; rating: number; featured?: boolean }
+
+export const posts: Post[] = [
+  { id: 'elephants', title: 'The Gentle Giants of Udawalawe', excerpt: 'A morning among Sri Lanka’s most iconic residents, and what their quiet rituals teach us about wild places.', category: 'Wildlife', author: 'Nimali Perera', date: 'May 14, 2024', read: '6 min read', rating: 4.9, featured: true, image: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1400&q=85' },
+  { id: 'safari', title: 'A First-Timer’s Guide to Safari', excerpt: 'Everything you need to know before your first sunrise drive through the park.', category: 'Travel tips', author: 'Ruwan Silva', date: 'May 08, 2024', read: '8 min read', rating: 4.8, image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=900&q=85' },
+  { id: 'monsoon', title: 'When the Rains Arrive', excerpt: 'The green season transforms Udawalawe into a different kind of wilderness.', category: 'Seasons', author: 'Ayesha Fernando', date: 'Apr 22, 2024', read: '5 min read', rating: 4.7, image: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=85' },
+  { id: 'birds', title: 'Birdsong at the Water’s Edge', excerpt: 'Meet the feathered residents that make every quiet lake feel alive.', category: 'Birds', author: 'Dilan Jayasinghe', date: 'Apr 10, 2024', read: '4 min read', rating: 4.9, image: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?auto=format&fit=crop&w=900&q=85' },
+]
