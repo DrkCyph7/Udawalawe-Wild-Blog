@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, onSnapshot, doc } from 'firebase/firestore'
+import { collection, query, where, getDocs, getDoc, onSnapshot, doc } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { callAdminModeratePost, callAdminDeletePost } from '@/lib/functions'
@@ -23,19 +23,26 @@ export default function BlogQueue() {
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
       if (!user) { setIsAdmin(false); setLoading(false); return }
-      // Check admin custom claim
-      const token = await user.getIdTokenResult()
-      if (token.claims.admin) {
-        setIsAdmin(true)
-        // Subscribe to meta/stats for badge counts
-        const unsubStats = onSnapshot(doc(db, 'meta', 'stats'), (snap) => {
-          if (snap.exists()) {
-            setPendingCount(snap.data().pendingCount ?? 0)
-            setReportedCount(snap.data().reportedCount ?? 0)
-          }
-        })
-        return () => unsubStats()
-      } else {
+      // Check NEXT_PUBLIC_ADMIN_UID or admins collection (Free Plan compatible)
+      try {
+        const isEnvAdmin = user.uid === process.env.NEXT_PUBLIC_ADMIN_UID
+        const adminSnap = await getDoc(doc(db, 'admins', user.uid))
+        if (isEnvAdmin || adminSnap.exists()) {
+          setIsAdmin(true)
+          // Subscribe to meta/stats for badge counts
+          const unsubStats = onSnapshot(doc(db, 'meta', 'stats'), (snap) => {
+            if (snap.exists()) {
+              setPendingCount(snap.data().pendingCount ?? 0)
+              setReportedCount(snap.data().reportedCount ?? 0)
+            }
+          })
+          return () => unsubStats()
+        } else {
+          setIsAdmin(false)
+          setLoading(false)
+        }
+      } catch (e) {
+        console.error(e)
         setIsAdmin(false)
         setLoading(false)
       }
