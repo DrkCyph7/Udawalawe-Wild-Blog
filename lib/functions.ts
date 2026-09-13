@@ -21,6 +21,7 @@ function todayString() {
 }
 
 async function isAdmin(uid: string) {
+  if (uid === process.env.NEXT_PUBLIC_ADMIN_UID) return true;
   try {
     const snap = await getDoc(doc(db, 'admins', uid));
     return snap.exists();
@@ -188,6 +189,7 @@ export const callAdminModeratePost = async (
     await runTransaction(db, async (tx) => {
       const postSnap = await tx.get(postRef);
       if (!postSnap.exists()) throw new Error("Post not found.");
+      if (postSnap.data().status === 'approved') throw new Error("Post is already approved.");
       
       tx.update(postRef, { status: 'approved', updatedAt: serverTimestamp() });
       
@@ -199,6 +201,10 @@ export const callAdminModeratePost = async (
     });
   } else if (action === 'reject') {
     await runTransaction(db, async (tx) => {
+      const postSnap = await tx.get(postRef);
+      if (!postSnap.exists()) throw new Error("Post not found.");
+      if (postSnap.data().status !== 'pending') throw new Error("Can only reject pending posts.");
+
       tx.update(postRef, {
         status: 'rejected',
         rejectionReason: reason || null,
