@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Rating } from './Rating'
 import { Heart, Lock } from 'lucide-react'
 import { BlogPost } from '@/lib/types'
+import { PostEditButton } from './PostEditButton'
 
 export function BlogCard({ post }: { post: BlogPost }) {
   // Strip HTML for the excerpt
@@ -54,7 +55,8 @@ export function BlogCard({ post }: { post: BlogPost }) {
               <span>{displayName}</span>
             )}
           </span>
-          <div className="card-footer-right">
+          <div className="card-footer-right flex items-center gap-2">
+            <PostEditButton authorId={post.authorId} postId={post.id} />
             {post.type === 'Review' && post.rating !== undefined && (
               <Rating value={post.rating} />
             )}
