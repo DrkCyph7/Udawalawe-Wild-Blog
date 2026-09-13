@@ -1,9 +1,51 @@
 import { ArrowRight, Camera } from 'lucide-react'
 import { BlogCard } from '@/components/BlogCard'
-import { posts } from '@/lib/mock-data'
+import { LoadMore } from '@/components/LoadMore'
 import Link from 'next/link'
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { BlogPost } from '@/lib/types'
 
-export default function BlogListingPage() { 
+export const dynamic = 'force-dynamic' // Ensure this page runs dynamically for fresh posts, or could revalidate
+
+export default async function BlogListingPage() { 
+  let initialPosts: BlogPost[] = [];
+  let initialLastDate: string | null = null;
+
+  try {
+    const q = query(
+      collection(db, 'posts'),
+      where('status', '==', 'approved'),
+      orderBy('createdAt', 'desc'),
+      limit(6)
+    );
+
+    const querySnapshot = await getDocs(q);
+    initialPosts = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        authorId: data.authorId,
+        authorName: data.authorName,
+        title: data.title,
+        body: data.body,
+        images: data.images || [],
+        type: data.type,
+        rating: data.rating,
+        status: data.status,
+        createdAt: data.createdAt?.toDate().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString(),
+      } as BlogPost;
+    });
+
+    if (querySnapshot.docs.length === 6) {
+      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt;
+      initialLastDate = lastVisible ? lastVisible.toDate().toISOString() : null;
+    }
+  } catch (error) {
+    console.error("Error fetching initial blog posts:", error);
+  }
+
   return (
     <>
       <section className="hero">
@@ -29,7 +71,16 @@ export default function BlogListingPage() {
           </div>
         </div>
         <div className="post-grid">
-          {posts.map(post => <BlogCard key={post.id} post={post} />)}
+          {initialPosts.length > 0 ? (
+            <>
+              {initialPosts.map(post => <BlogCard key={post.id} post={post} />)}
+              <LoadMore initialLastDate={initialLastDate} />
+            </>
+          ) : (
+            <div className="col-span-full py-12 text-center text-zinc-500">
+              No stories published yet.
+            </div>
+          )}
         </div>
         <div className="join-banner">
           <div>
