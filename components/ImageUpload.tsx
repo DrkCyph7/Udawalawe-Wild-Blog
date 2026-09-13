@@ -50,27 +50,15 @@ export function ImageUpload({ images, onChange, maxFiles = 5, maxSizeMB = 5 }: I
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap gap-4 mb-4">
-        {images.map((file, index) => (
-          <div key={`${file.name}-${index}`} className="relative w-24 h-24 sm:w-32 sm:h-32 group">
-            <img 
-              src={URL.createObjectURL(file)} 
-              alt={`preview ${index}`} 
-              className="object-cover w-full h-full rounded-md border"
-            />
-            <button
-              type="button"
-              onClick={() => removeImage(index)}
-              className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        ))}
+      <div className="upload">
+        <div>
+          <strong>Add photographs</strong>
+          <span>(Max {maxFiles}, up to {maxSizeMB}MB each)</span>
+        </div>
+        
         {images.length < maxFiles && (
-          <label className="w-24 h-24 sm:w-32 sm:h-32 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
-            <Upload size={24} className="text-zinc-400 mb-2" />
-            <span className="text-xs text-zinc-500 text-center px-2">Add Image</span>
+          <label className="cursor-pointer ml-auto border border-[#d8d5ca] bg-transparent py-[9px] px-[13px] text-[10px] hover:bg-[#e2dfd5] transition-colors">
+            Choose files
             <input 
               type="file" 
               accept="image/*" 
@@ -81,8 +69,29 @@ export function ImageUpload({ images, onChange, maxFiles = 5, maxSizeMB = 5 }: I
           </label>
         )}
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <p className="text-xs text-zinc-500">Max {maxFiles} images, {maxSizeMB}MB each.</p>
+
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-4 mt-4">
+          {images.map((file, index) => (
+            <div key={`${file.name}-${index}`} className="relative w-24 h-24 sm:w-28 sm:h-28 group">
+              <img 
+                src={URL.createObjectURL(file)} 
+                alt={`preview ${index}`} 
+                className="object-cover w-full h-full border border-[#d8d5ca]"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
     </div>
   )
 }
