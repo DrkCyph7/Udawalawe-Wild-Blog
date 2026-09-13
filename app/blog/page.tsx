@@ -19,7 +19,8 @@ export default async function BlogListingPage({
   try {
     const q = query(
       collection(db, 'posts'),
-      where('status', '==', 'approved')
+      where('status', '==', 'approved'),
+      where('visibility', '==', 'public')
     )
 
     const querySnapshot = await getDocs(q)
@@ -75,7 +76,7 @@ export default async function BlogListingPage({
           <a href="#stories" className="outline-button">Explore the stories <ArrowRight size={16}/></a>
         </div>
         <div className="hero-image">
-          <img src="https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=85" alt="Elephant in Udawalawe"/>
+          <img src="/home-hero.png" alt="Elephant in Udawalawe"/>
         </div>
       </section>
 
