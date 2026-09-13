@@ -165,12 +165,9 @@ export default function NewStory() {
           <Editor content={content} onChange={setContent} />
         </label>
 
-        <label className="flex flex-col gap-2 mt-4">
-          Add photographs (Max 5, up to 5MB each)
-          <div className="mt-2">
-            <ImageUpload images={images} onChange={setImages} />
-          </div>
-        </label>
+        <div className="mt-4">
+          <ImageUpload images={images} onChange={setImages} />
+        </div>
 
         {error && (
           <div className="p-4 bg-red-50 text-red-600 rounded-md text-sm border border-red-200 mt-4">
