@@ -13,15 +13,15 @@ export default async function BlogListingPage() {
   let initialLastDate: string | null = null;
 
   try {
+    // To avoid requiring a composite index in Firestore for status + createdAt,
+    // we query by status, and sort in memory. 
     const q = query(
       collection(db, 'posts'),
-      where('status', '==', 'approved'),
-      orderBy('createdAt', 'desc'),
-      limit(6)
+      where('status', '==', 'approved')
     );
 
     const querySnapshot = await getDocs(q);
-    initialPosts = querySnapshot.docs.map(doc => {
+    const allApprovedPosts = querySnapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -38,9 +38,14 @@ export default async function BlogListingPage() {
       } as BlogPost;
     });
 
-    if (querySnapshot.docs.length === 6) {
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt;
-      initialLastDate = lastVisible ? lastVisible.toDate().toISOString() : null;
+    // Sort descending by createdAt
+    allApprovedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Take the first 6
+    initialPosts = allApprovedPosts.slice(0, 6);
+
+    if (initialPosts.length > 0) {
+      initialLastDate = initialPosts[initialPosts.length - 1].createdAt;
     }
   } catch (error) {
     console.error("Error fetching initial blog posts:", error);
