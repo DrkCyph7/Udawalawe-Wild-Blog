@@ -129,7 +129,7 @@ export default async function PostDetailPage({ params }: Props) {
       <div className="article-layout">
         <article className="article-body">
           <div 
-            className="prose prose-lg dark:prose-invert max-w-none"
+            className="article-content"
             dangerouslySetInnerHTML={{ __html: post.body }}
           />
           
@@ -154,12 +154,15 @@ export default async function PostDetailPage({ params }: Props) {
           <h3>Have you been here?</h3>
           <p>Share your experience with fellow explorers.</p>
           <Link href="/blog/new" className="dark-button full !inline-flex justify-center items-center gap-2">Write a review <Pencil size={15}/></Link>
-          <div className="review-divider"/>
-          <div className="review-stat">
-            <strong>4.9</strong>
-            <Rating value={4.9} large/>
-            <span>Based on 28 reviews</span>
-          </div>
+          {post.type === 'Review' && post.rating !== undefined && (
+            <>
+              <div className="review-divider"/>
+              <div className="review-stat">
+                <strong>{post.rating.toFixed(1)}</strong>
+                <Rating value={post.rating} large/>
+              </div>
+            </>
+          )}
         </aside>
       </div>
     </main>
