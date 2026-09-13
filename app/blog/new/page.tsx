@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { collection, addDoc, doc, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { db, auth } from '@/lib/firebase'
 import { Editor } from '@/components/Editor'
 import { ImageUpload } from '@/components/ImageUpload'
 import { StarRating } from '@/components/StarRating'
@@ -71,19 +71,24 @@ export default function NewStory() {
     setProgress('Checking rate limits...')
 
     try {
-      // 1. Check rate limit
-      const userRef = doc(db, 'users', MOCK_USER.uid)
-      const userSnap = await getDoc(userRef)
-      
+      const adminUid = process.env.NEXT_PUBLIC_ADMIN_UID
+      const isAdmin = auth.currentUser?.uid === adminUid
+      const userRef = doc(db, 'users', auth.currentUser?.uid || MOCK_USER.uid)
       const now = new Date()
-      if (userSnap.exists()) {
-        const userData = userSnap.data()
-        if (userData.lastPostAt) {
-          const lastPost = userData.lastPostAt.toDate()
-          const hoursSinceLastPost = (now.getTime() - lastPost.getTime()) / (1000 * 60 * 60)
-          
-          if (hoursSinceLastPost < 24) {
-            throw new Error(`You can only submit one post every 24 hours. Please wait ${Math.ceil(24 - hoursSinceLastPost)} more hours.`)
+
+      // 1. Check rate limit
+      if (!isAdmin) {
+        const userSnap = await getDoc(userRef)
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data()
+          if (userData.lastPostAt) {
+            const lastPost = userData.lastPostAt.toDate()
+            const hoursSinceLastPost = (now.getTime() - lastPost.getTime()) / (1000 * 60 * 60)
+            
+            if (hoursSinceLastPost < 24) {
+              throw new Error(`You can only submit one post every 24 hours. Please wait ${Math.ceil(24 - hoursSinceLastPost)} more hours.`)
+            }
           }
         }
       }
