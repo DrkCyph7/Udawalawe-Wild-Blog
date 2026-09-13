@@ -9,7 +9,10 @@ service cloud.firestore {
 
     // Admin is enforced via existence of a document in the admins collection
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        request.auth.uid == 'hYgSo3Q4LNf317sChN8pUtMlvvE3' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
 
     function isOwner(uid) {
@@ -25,35 +28,40 @@ service cloud.firestore {
       // READ: approved public posts visible to all; private to owner/admin
       allow read: if
         (resource.data.status == 'approved'
-          && resource.data.get('visibility', 'public') == 'public'
-          && resource.data.status != 'deleted')
+          && resource.data.visibility == 'public')
         || isAdmin()
         || (isSignedIn()
             && resource.data.authorId == request.auth.uid
             && resource.data.status != 'deleted');
 
       // CREATE: Must be signed in, and authorId must match auth.uid
-      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow create: if isSignedIn() 
+                    && request.resource.data.authorId == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.likes == 0
+                    && request.resource.data.reportCount == 0
+                    && request.resource.data.visibility in ['public', 'private'];
 
-      // UPDATE: Admins can do anything. Owners can submit pending edits. Anyone can like/report with strict validation.
+      // UPDATE: Admins can do anything. Owners can submit pending edits or direct edits if pending. Anyone can like/report with strict validation.
       allow update: if isAdmin()
                     || isValidLikeToggle()
                     || isValidReportAdd()
-                    || isValidPendingEdit();
+                    || isValidPendingEdit()
+                    || isValidDirectEdit();
 
       allow delete: if false;
     }
 
     match /users/{uid} {
       allow read: if true;
-      // Allow user to write their own profile and rate-limit fields (client-side enforced)
-      allow write: if isOwner(uid) || isAdmin();
+      // Allow user to write their own profile, but restrict sensitive fields
+      allow write: if isAdmin() || (isOwner(uid) && isValidUserProfileUpdate());
     }
 
     match /meta/{docId} {
       allow read: if isAdmin();
       // Allow signed in users to increment counts
-      allow write: if isSignedIn();
+      allow write: if isAdmin() || (isSignedIn() && isValidMetaUpdate());
     }
 
     // ─── Validation functions ──────────────────────────────────────────────────
@@ -107,8 +115,33 @@ service cloud.firestore {
       let after = request.resource.data;
       let isOwner = before.authorId == uid;
       let postOk = before.status == 'approved';
-      let onlyEditFields = request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pendingEdit', 'updatedAt']);
+      let onlyEditFields = request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pendingEdit', 'visibility', 'updatedAt']);
       return isOwner && postOk && onlyEditFields;
+    }
+
+    function isValidDirectEdit() {
+      let uid = request.auth.uid;
+      let before = resource.data;
+      let isOwner = before.authorId == uid;
+      let isPending = before.status == 'pending';
+      let forbidden = ['authorId', 'likes', 'likedBy', 'reportCount', 'reportedBy', 'status'];
+      return isOwner && isPending && !request.resource.data.diff(resource.data).affectedKeys().hasAny(forbidden);
+    }
+
+    function isValidUserProfileUpdate() {
+      let isCreating = resource == null;
+      let diff = isCreating ? request.resource.data.keys() : request.resource.data.diff(resource.data).affectedKeys();
+      // Block changing postCount from the client. Admins bypass this.
+      return isCreating || !diff.hasAny(['postCount']);
+    }
+
+    function isValidMetaUpdate() {
+      let isCreating = resource == null;
+      let diff = isCreating ? request.resource.data.keys() : request.resource.data.diff(resource.data).affectedKeys();
+      let onlyPendingCount = diff.hasOnly(['pendingCount']);
+      let validCreation = isCreating && request.resource.data.pendingCount == 1;
+      let validChange = !isCreating && request.resource.data.pendingCount == resource.data.pendingCount + 1;
+      return onlyPendingCount && (validCreation || validChange);
     }
   }
 }
