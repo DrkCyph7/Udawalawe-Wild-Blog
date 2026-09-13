@@ -26,11 +26,11 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
     params.then(async ({ uid: paramUid }) => {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (!user) {
-          router.push('/blog/login')
+          router.push('/login')
           return
         }
         if (user.uid !== paramUid) {
-          router.push(`/blog/profile/${paramUid}`)
+          router.push(`/profile/${paramUid}`)
           return
         }
         setUid(user.uid)

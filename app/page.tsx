@@ -76,7 +76,7 @@ export default async function BlogListingPage({
           <a href="#stories" className="outline-button">Explore the stories <ArrowRight size={16}/></a>
         </div>
         <div className="hero-image">
-          <img src="/home-hero.png" alt="Elephant in Udawalawe"/>
+          <img src="/blog/home-hero.png" alt="Elephant in Udawalawe"/>
         </div>
       </section>
 

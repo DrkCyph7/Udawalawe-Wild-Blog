@@ -142,7 +142,7 @@ export default function EditStory() {
       }
 
       router.refresh()
-      router.push(`/blog/${id}`)
+      router.push(`/${id}`)
     } catch (err: any) {
       console.error(err)
       setError(err?.message || 'An error occurred during submission.')

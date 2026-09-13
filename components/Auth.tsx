@@ -28,7 +28,7 @@ export function Auth({ signup }: { signup?: boolean }) {
       } else {
         await signInWithEmailAndPassword(auth, email, password)
       }
-      router.push('/blog')
+      router.push('/')
     } catch (err: any) {
       setError(err.message || 'An error occurred during authentication')
     } finally {
@@ -42,7 +42,7 @@ export function Auth({ signup }: { signup?: boolean }) {
     try {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
-      router.push('/blog')
+      router.push('/')
     } catch (err: any) {
       console.error(err)
       setError(err.message || 'An error occurred during Google sign in')
@@ -54,7 +54,7 @@ export function Auth({ signup }: { signup?: boolean }) {
   return (
     <main className="auth-page">
       <div className="auth-art">
-        <img src="/auth-bg.png" alt="Wild elephant in the forest"/>
+        <img src="/blog/auth-bg.png" alt="Wild elephant in the forest"/>
         <div>
           <span className="brand-mark">
             <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />

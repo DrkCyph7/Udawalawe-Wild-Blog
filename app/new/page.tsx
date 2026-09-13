@@ -80,7 +80,7 @@ export default function NewStory() {
         visibility,
       })
 
-      router.push('/blog/success')
+      router.push('/success')
     } catch (err: any) {
       console.error(err)
       // Firebase callable errors have a `message` from the function

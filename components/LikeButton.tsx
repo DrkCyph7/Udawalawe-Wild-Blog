@@ -25,7 +25,7 @@ export function LikeButton({ postId, initialLikes, initialLikedBy }: LikeButtonP
 
   const handleLike = async () => {
     if (!auth?.currentUser) {
-      router.push('/blog/login')
+      router.push('/login')
       return
     }
     if (loading) return

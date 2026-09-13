@@ -26,7 +26,7 @@ export function ReportButton({ postId, authorId, initialReportedBy }: ReportButt
 
   const handleReport = async () => {
     if (!currentUser) {
-      router.push('/blog/login')
+      router.push('/login')
       return
     }
     if (reported || loading) return
