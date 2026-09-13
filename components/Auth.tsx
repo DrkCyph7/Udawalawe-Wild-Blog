@@ -1,5 +1,6 @@
-import { ArrowRight, ChevronLeft, Leaf } from 'lucide-react'
+import { ArrowRight, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export function Auth({ signup }: { signup?: boolean }) { 
   return (
@@ -7,7 +8,9 @@ export function Auth({ signup }: { signup?: boolean }) {
       <div className="auth-art">
         <img src="https://images.unsplash.com/photo-1534567110243-8875d64ca8ff?auto=format&fit=crop&w=1200&q=85" alt="Wild elephant in the forest"/>
         <div>
-          <span className="brand-mark"><Leaf size={18}/></span>
+          <span className="brand-mark">
+            <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
+          </span>
           <p>Join a community<br/><i>that looks closer.</i></p>
         </div>
       </div>
