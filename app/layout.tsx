@@ -6,7 +6,7 @@ import { Footer } from '@/components/Footer'
 export const metadata: Metadata = {
   title: 'Udawalawe Wild — Stories from the Wild',
   description: 'A community journal for curious travelers, devoted naturalists, and everyone who feels at home under an open sky.',
-    generator: 'v0.app',
+  generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
