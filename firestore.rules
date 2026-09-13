@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to all posts
+    match /posts/{postId} {
+      // For development, allowing public writes since the app uses MOCK_USER
+      // TODO: Change this to `allow write: if request.auth != null;` when real Firebase Auth is added
+      allow read, write: if true; 
+    }
+    
+    // Allow users to read and update their own rate-limit documents
+    match /users/{userId} {
+      // For development, allowing public writes since the app uses MOCK_USER
+      // TODO: Change this to `allow read, write: if request.auth != null && request.auth.uid == userId;`
+      allow read, write: if true;
+    }
+  }
+}
