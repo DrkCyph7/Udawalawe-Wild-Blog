@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
-import { User } from 'firebase/auth'
+import { User, updateProfile } from 'firebase/auth'
 import { ChevronLeft, Camera, Save } from 'lucide-react'
 import Link from 'next/link'
 
@@ -121,6 +121,10 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
         bio: bio.trim(),
         photoURL: finalPhotoURL,
       }, { merge: true })
+
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { photoURL: finalPhotoURL || '' })
+      }
 
       setPhotoURL(finalPhotoURL)
       setPhotoFile(null)
