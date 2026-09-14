@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { Search, Menu, LogOut, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
-import { auth } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 
 export function Header() {
   const pathname = usePathname()
@@ -21,6 +22,24 @@ export function Header() {
       if (currentUser) {
         const token = await currentUser.getIdTokenResult()
         setIsAdmin(!!token.claims.admin)
+        
+        // Ensure user document exists in Firestore (for Google sign-in or first loads)
+        try {
+          const userRef = doc(db, 'users', currentUser.uid)
+          const snap = await getDoc(userRef)
+          if (!snap.exists()) {
+            await setDoc(userRef, {
+              displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+              photoURL: currentUser.photoURL || null,
+              email: currentUser.email || null,
+              bio: null,
+              createdAt: serverTimestamp(),
+              postCount: 0
+            })
+          }
+        } catch (err) {
+          console.error("Error ensuring user doc:", err)
+        }
       } else {
         setIsAdmin(false)
       }
