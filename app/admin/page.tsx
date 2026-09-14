@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { collection, query, where, getDocs, getDoc, onSnapshot, doc } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, User } from 'firebase/auth'
 import { callAdminModeratePost, callAdminDeletePost } from '@/lib/functions'
 import { Trash2, Check, X, Bell, FileEdit } from 'lucide-react'
 import type { BlogPost } from '@/lib/types'
@@ -12,6 +12,8 @@ type Tab = 'pending' | 'approved' | 'reported'
 
 export default function BlogQueue() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
+  const [adminCheckError, setAdminCheckError] = useState(false)
+  const [adminUser, setAdminUser] = useState<User | null>(null)
   const [tab, setTab] = useState<Tab>('pending')
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,32 +24,37 @@ export default function BlogQueue() {
   const [pendingCount, setPendingCount] = useState(0)
   const [reportedCount, setReportedCount] = useState(0)
 
-  useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, async (user) => {
-      if (!user) { setIsAdmin(false); setLoading(false); return }
-      // Check NEXT_PUBLIC_ADMIN_UID or admins collection (Free Plan compatible)
-      try {
-        const isEnvAdmin = user.uid === process.env.NEXT_PUBLIC_ADMIN_UID
-        const adminSnap = await getDoc(doc(db, 'admins', user.uid))
-        if (isEnvAdmin || adminSnap.exists()) {
-          setIsAdmin(true)
-          // Subscribe to meta/stats for badge counts
-          const unsubStats = onSnapshot(doc(db, 'meta', 'stats'), (snap) => {
-            if (snap.exists()) {
-              setPendingCount(snap.data().pendingCount ?? 0)
-              setReportedCount(snap.data().reportedCount ?? 0)
-            }
-          })
-          return () => unsubStats()
-        } else {
-          setIsAdmin(false)
-          setLoading(false)
-        }
-      } catch (e) {
-        console.error(e)
+  const verifyAdmin = async (user: User) => {
+    setLoading(true)
+    setAdminCheckError(false)
+    try {
+      const isEnvAdmin = user.uid === process.env.NEXT_PUBLIC_ADMIN_UID
+      const adminSnap = await getDoc(doc(db, 'admins', user.uid))
+      if (isEnvAdmin || adminSnap.exists()) {
+        setIsAdmin(true)
+        // Subscribe to meta/stats for badge counts
+        onSnapshot(doc(db, 'meta', 'stats'), (snap) => {
+          if (snap.exists()) {
+            setPendingCount(snap.data().pendingCount ?? 0)
+            setReportedCount(snap.data().reportedCount ?? 0)
+          }
+        })
+      } else {
         setIsAdmin(false)
         setLoading(false)
       }
+    } catch (e) {
+      console.error(e)
+      setAdminCheckError(true)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      if (!user) { setIsAdmin(false); setLoading(false); return }
+      setAdminUser(user)
+      verifyAdmin(user)
     })
     return () => unsubAuth()
   }, [])
@@ -120,13 +127,22 @@ export default function BlogQueue() {
     )
   }
 
-  if (isAdmin === false) {
+  if (isAdmin === false && !adminCheckError) {
     return (
       <div className="min-h-screen bg-[#f5f5f0] flex flex-col items-center justify-center p-4">
         <h1 className="text-6xl font-serif text-[#324b37] mb-6">Access Denied</h1>
         <p className="text-lg text-[#526356] max-w-lg text-center">
           You do not have permission to view this page.
         </p>
+      </div>
+    )
+  }
+
+  if (adminCheckError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f9f8f4]">
+        <p className="text-red-600 mb-4 font-serif text-lg">Failed to verify admin status.</p>
+        <button onClick={() => adminUser && verifyAdmin(adminUser)} className="border border-[#304936] text-[#304936] px-6 py-2 hover:bg-[#304936] hover:text-white transition-colors">Retry</button>
       </div>
     )
   }
