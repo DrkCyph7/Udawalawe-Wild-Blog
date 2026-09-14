@@ -47,7 +47,8 @@ service cloud.firestore {
                     || isValidLikeToggle()
                     || isValidReportAdd()
                     || isValidPendingEdit()
-                    || isValidDirectEdit();
+                    || isValidDirectEdit()
+                    || isValidProfileSync();
 
       allow delete: if false;
     }
@@ -126,6 +127,14 @@ service cloud.firestore {
       let isPending = before.status == 'pending';
       let forbidden = ['authorId', 'likes', 'likedBy', 'reportCount', 'reportedBy', 'status'];
       return isOwner && isPending && !request.resource.data.diff(resource.data).affectedKeys().hasAny(forbidden);
+    }
+
+    function isValidProfileSync() {
+      let uid = request.auth.uid;
+      let before = resource.data;
+      let isOwner = before.authorId == uid;
+      let onlyProfileFields = request.resource.data.diff(resource.data).affectedKeys().hasOnly(['authorName', 'authorPhotoURL', 'updatedAt']);
+      return isOwner && onlyProfileFields;
     }
 
     function isValidUserProfileUpdate() {

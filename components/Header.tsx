@@ -7,26 +7,30 @@ import { Search, Menu, LogOut, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
 import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore'
 
 export function Header() {
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
+  const [userProfile, setUserProfile] = useState<{ displayName?: string | null, photoURL?: string | null } | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
     if (!auth) return
+    let unsubSnap: (() => void) | undefined;
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
+      if (unsubSnap) unsubSnap();
+
       if (currentUser) {
         const token = await currentUser.getIdTokenResult()
         setIsAdmin(!!token.claims.admin)
         
-        // Ensure user document exists in Firestore (for Google sign-in or first loads)
-        try {
-          const userRef = doc(db, 'users', currentUser.uid)
-          const snap = await getDoc(userRef)
+        // Ensure user document exists and listen to real-time updates for navbar
+        const userRef = doc(db, 'users', currentUser.uid)
+        unsubSnap = onSnapshot(userRef, async (snap) => {
           if (!snap.exists()) {
             await setDoc(userRef, {
               displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
@@ -36,15 +40,24 @@ export function Header() {
               createdAt: serverTimestamp(),
               postCount: 0
             })
+          } else {
+            setUserProfile({
+              displayName: snap.data().displayName,
+              photoURL: snap.data().photoURL
+            })
           }
-        } catch (err) {
-          console.error("Error ensuring user doc:", err)
-        }
+        }, (err) => {
+          console.error("Error listening to user doc:", err)
+        })
       } else {
         setIsAdmin(false)
+        setUserProfile(null)
       }
     })
-    return () => unsubscribe()
+    return () => {
+      unsubscribe()
+      if (unsubSnap) unsubSnap()
+    }
   }, [])
 
   // Close mobile menu when pathname changes
@@ -77,12 +90,12 @@ export function Header() {
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <Link href={`/profile/${user.uid}`} className="nav-profile-link">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" className="avatar object-cover" />
+                {(userProfile?.photoURL || user.photoURL) ? (
+                  <img src={userProfile?.photoURL || user.photoURL || ''} alt="Profile" className="avatar object-cover" />
                 ) : (
-                  <span className="avatar">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                  <span className="avatar">{((userProfile?.displayName || user.displayName || user.email || 'U').charAt(0)).toUpperCase()}</span>
                 )}
-                <span className="nav-name">{user.displayName || user.email?.split('@')[0]}</span>
+                <span className="nav-name">{userProfile?.displayName || user.displayName || user.email?.split('@')[0]}</span>
               </Link>
               <button onClick={handleLogout} className="text-link flex items-center gap-1.5">
                 <LogOut size={14} /> Log out
@@ -118,12 +131,12 @@ export function Header() {
           {user ? (
             <div className="flex flex-col gap-5">
               <Link href={`/profile/${user.uid}`} className="text-[#304936] font-semibold flex items-center gap-3 text-[15px]">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" className="avatar flex-shrink-0 object-cover" />
+                {(userProfile?.photoURL || user.photoURL) ? (
+                  <img src={userProfile?.photoURL || user.photoURL || ''} alt="Profile" className="avatar flex-shrink-0 object-cover" />
                 ) : (
-                  <span className="avatar flex-shrink-0">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                  <span className="avatar flex-shrink-0">{((userProfile?.displayName || user.displayName || user.email || 'U').charAt(0)).toUpperCase()}</span>
                 )}
-                {user.displayName || user.email?.split('@')[0]}
+                {userProfile?.displayName || user.displayName || user.email?.split('@')[0]}
               </Link>
               <button onClick={handleLogout} className="text-[#768078] hover:text-[#304936] text-left text-[15px] font-medium flex items-center gap-2">
                 <LogOut size={16} /> Log out

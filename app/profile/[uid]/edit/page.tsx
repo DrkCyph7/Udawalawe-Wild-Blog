@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from 'firebase/firestore'
 import { User, updateProfile } from 'firebase/auth'
 import { ChevronLeft, Camera, Save } from 'lucide-react'
 import Link from 'next/link'
@@ -123,7 +123,29 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
       }, { merge: true })
 
       if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { photoURL: finalPhotoURL || '' })
+        await updateProfile(auth.currentUser, { 
+          photoURL: finalPhotoURL || '',
+          displayName: displayName.trim() 
+        })
+      }
+
+      // Sync the new profile photo and name to existing posts
+      try {
+        const postsQ = query(collection(db, 'posts'), where('authorId', '==', uid));
+        const postsSnap = await getDocs(postsQ);
+        if (!postsSnap.empty) {
+          const batch = writeBatch(db);
+          postsSnap.forEach((docSnap) => {
+            batch.update(docSnap.ref, {
+              authorName: displayName.trim(),
+              authorPhotoURL: finalPhotoURL,
+              updatedAt: serverTimestamp()
+            });
+          });
+          await batch.commit();
+        }
+      } catch (err) {
+        console.error("Failed to sync posts with new profile details:", err);
       }
 
       setPhotoURL(finalPhotoURL)
