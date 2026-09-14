@@ -16,6 +16,7 @@ export function ProfileTabs({ uid, initialPublicPosts }: { uid: string, initialP
     public: initialPublicPosts,
     private: [],
     pending: []
+  })
   const [loading, setLoading] = useState(false)
   const [fetchErrors, setFetchErrors] = useState<Record<Tab, boolean>>({
     public: false,
