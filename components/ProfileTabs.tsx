@@ -16,8 +16,12 @@ export function ProfileTabs({ uid, initialPublicPosts }: { uid: string, initialP
     public: initialPublicPosts,
     private: [],
     pending: []
-  })
   const [loading, setLoading] = useState(false)
+  const [fetchErrors, setFetchErrors] = useState<Record<Tab, boolean>>({
+    public: false,
+    private: false,
+    pending: false
+  })
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -34,6 +38,8 @@ export function ProfileTabs({ uid, initialPublicPosts }: { uid: string, initialP
   }, [uid])
 
   const fetchOwnerPosts = async (tab: Tab, ownerUid: string) => {
+    setLoading(true)
+    setFetchErrors(prev => ({ ...prev, [tab]: false }))
     try {
       let q
       if (tab === 'private') {
@@ -82,6 +88,9 @@ export function ProfileTabs({ uid, initialPublicPosts }: { uid: string, initialP
       setPosts(prev => ({ ...prev, [tab]: fetched }))
     } catch (e) {
       console.error(`Error fetching ${tab} posts:`, e)
+      setFetchErrors(prev => ({ ...prev, [tab]: true }))
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -126,6 +135,11 @@ export function ProfileTabs({ uid, initialPublicPosts }: { uid: string, initialP
 
       {loading ? (
         <div className="py-16 text-center text-[#768078] font-serif">Loading…</div>
+      ) : fetchErrors[activeTab] ? (
+        <div className="py-16 text-center">
+          <p className="text-red-600 font-serif mb-4">Failed to load {activeTab} stories.</p>
+          <button onClick={() => fetchOwnerPosts(activeTab, uid)} className="border border-[#304936] text-[#304936] px-4 py-2 hover:bg-[#304936] hover:text-white transition-colors">Retry</button>
+        </div>
       ) : currentPosts.length === 0 ? (
         <div className="profile-empty">
           <p>No {activeTab} stories found.</p>
