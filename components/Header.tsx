@@ -58,7 +58,11 @@ export function Header() {
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <Link href={`/profile/${user.uid}`} className="nav-profile-link">
-                <span className="avatar">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="avatar object-cover" />
+                ) : (
+                  <span className="avatar">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                )}
                 <span className="nav-name">{user.displayName || user.email?.split('@')[0]}</span>
               </Link>
               <button onClick={handleLogout} className="text-link flex items-center gap-1.5">
@@ -95,7 +99,11 @@ export function Header() {
           {user ? (
             <div className="flex flex-col gap-5">
               <Link href={`/profile/${user.uid}`} className="text-[#304936] font-semibold flex items-center gap-3 text-[15px]">
-                <span className="avatar flex-shrink-0">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="avatar flex-shrink-0 object-cover" />
+                ) : (
+                  <span className="avatar flex-shrink-0">{(user.displayName || user.email || 'U').charAt(0).toUpperCase()}</span>
+                )}
                 {user.displayName || user.email?.split('@')[0]}
               </Link>
               <button onClick={handleLogout} className="text-[#768078] hover:text-[#304936] text-left text-[15px] font-medium flex items-center gap-2">
