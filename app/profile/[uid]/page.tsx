@@ -77,7 +77,14 @@ export default async function ProfilePage({ params }: Props) {
     .map((n: string) => n[0])
     .join('')
     .toUpperCase()
-    .slice(0, 2)
+  let joinedDateStr = null
+  const rawCreatedAt = userSnap.data().createdAt
+  if (rawCreatedAt) {
+    const d = rawCreatedAt.toDate ? rawCreatedAt.toDate() : new Date(rawCreatedAt)
+    if (!isNaN(d.getTime())) {
+      joinedDateStr = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    }
+  }
 
   return (
     <main className="profile-page">
@@ -91,11 +98,24 @@ export default async function ProfilePage({ params }: Props) {
         </div>
         <div className="profile-meta">
           <p className="eyebrow"><span className="eyebrow-line" /> Explorer profile</p>
-          <h1>{profile.displayName || 'Explorer'}</h1>
+          <h1 style={!profile.bio ? { marginBottom: '8px' } : undefined}>{profile.displayName || 'Explorer'}</h1>
           {profile.bio && <p className="profile-bio">{profile.bio}</p>}
           <div className="profile-stats">
             <span><strong>{posts.length}</strong> public stories</span>
+            {joinedDateStr && (
+              <>
+                <span className="text-zinc-300 mx-3">•</span>
+                <span>Joined {joinedDateStr}</span>
+              </>
+            )}
           </div>
+          {posts.length <= 1 && (
+            <div className="mt-5">
+              <Link href="/new" className="text-link !inline-flex items-center gap-1">
+                Share your next sighting <span style={{ fontSize: '1.2em', lineHeight: 1 }}>→</span>
+              </Link>
+            </div>
+          )}
           <ProfileEditLink uid={uid} />
         </div>
       </div>
