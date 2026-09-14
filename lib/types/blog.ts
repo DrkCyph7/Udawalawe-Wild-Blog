@@ -5,6 +5,7 @@ export interface Post {
   id: string;
   authorId: string;
   authorName: string;
+  authorPhotoURL?: string | null;
   title: string;
   body: string; // Rich text or markdown content
   images: string[]; // Array of image URLs

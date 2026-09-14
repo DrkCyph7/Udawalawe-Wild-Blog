@@ -2,6 +2,7 @@ export type BlogPost = {
   id: string;
   authorId: string;
   authorName: string;
+  authorPhotoURL?: string | null;
   isAnonymous: boolean;
   visibility: 'public' | 'private';
   title: string;

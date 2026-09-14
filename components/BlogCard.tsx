@@ -46,7 +46,11 @@ export function BlogCard({ post }: { post: BlogPost }) {
         <p>{excerpt}</p>
         <div className="card-footer">
           <span className="author">
-            <span className="avatar">{displayName.charAt(0)}</span>
+            {post.authorPhotoURL && canLinkToProfile ? (
+              <img src={post.authorPhotoURL} alt={displayName} className="avatar object-cover" />
+            ) : (
+              <span className="avatar">{displayName.charAt(0)}</span>
+            )}
             {canLinkToProfile ? (
               <Link href={`/profile/${post.authorId}`} className="author-link">
                 {displayName}

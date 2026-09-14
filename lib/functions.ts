@@ -135,6 +135,7 @@ export const callSubmitPost = async (postData: {
     tx.set(newPostRef, {
       authorId: uid,
       authorName,
+      authorPhotoURL: user.photoURL || userData.photoURL || null,
       isAnonymous: postData.isAnonymous ?? false,
       visibility: postData.visibility ?? 'public',
       title: postData.title.trim(),
