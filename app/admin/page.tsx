@@ -15,6 +15,7 @@ export default function BlogQueue() {
   const [tab, setTab] = useState<Tab>('pending')
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState<Record<string, string>>({})
   const [pendingCount, setPendingCount] = useState(0)
@@ -56,6 +57,7 @@ export default function BlogQueue() {
 
   const fetchPosts = async (activeTab: Tab) => {
     setLoading(true)
+    setFetchError(false)
     try {
       let q
       if (activeTab === 'pending') {
@@ -76,6 +78,7 @@ export default function BlogQueue() {
       setPosts(fetched)
     } catch (e) {
       console.error(e)
+      setFetchError(true)
     } finally {
       setLoading(false)
     }
@@ -154,6 +157,11 @@ export default function BlogQueue() {
 
         {loading ? (
           <div className="py-16 text-center text-[#768078] font-serif">Loading…</div>
+        ) : fetchError ? (
+          <div className="py-16 text-center">
+            <p className="text-red-600 font-serif mb-4">Failed to load posts.</p>
+            <button onClick={() => fetchPosts(tab)} className="border border-[#304936] text-[#304936] px-4 py-2 hover:bg-[#304936] hover:text-white transition-colors">Retry</button>
+          </div>
         ) : posts.length === 0 ? (
           <div className="py-16 text-center text-[#768078] font-serif">Nothing here.</div>
         ) : (
