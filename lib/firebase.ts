@@ -11,6 +11,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+console.log("Firebase Auth Domain at init:", process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN);
+
 // Initialize Firebase only if config is provided
 const isConfigured = !!firebaseConfig.apiKey;
 const app = isConfigured ? (!getApps().length ? initializeApp(firebaseConfig) : getApp()) : null;
