@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { auth } from '@/lib/firebase'
+import { onAuthStateChanged, User } from 'firebase/auth'
 import { callSubmitPost } from '@/lib/functions'
 import { Editor } from '@/components/Editor'
 import { ImageUpload } from '@/components/ImageUpload'
@@ -26,6 +27,17 @@ export default function NewStory() {
   const [progress, setProgress] = useState('')
   const [error, setError] = useState('')
 
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u)
+      setAuthLoading(false)
+    })
+    return () => unsub()
+  }, [])
+
   const uploadImagesToCloudinary = async (files: File[]): Promise<string[]> => {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
@@ -47,8 +59,8 @@ export default function NewStory() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const currentUser = auth?.currentUser
-    if (!currentUser) {
+    if (authLoading) return
+    if (!user) {
       setError('You must be signed in to submit a story.')
       return
     }
@@ -99,7 +111,18 @@ export default function NewStory() {
         <span className="save-status">Stories are reviewed before publishing.</span>
       </div>
 
-      <form onSubmit={handleSubmit} className="new-inner">
+      <form onSubmit={handleSubmit} className="new-inner relative">
+        {!authLoading && !user && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#fbfaf6]/90 backdrop-blur-sm border border-[#d8d5ca] p-6 text-center">
+            <Lock size={32} className="mb-4 text-[#304936]" />
+            <h2 className="text-xl font-serif text-[#324b37] mb-2">Sign in to continue</h2>
+            <p className="text-sm text-[#526356] mb-6">Your draft is preserved. Sign in to submit your story.</p>
+            <Link href="/login?redirect=/new" className="dark-button !inline-flex items-center gap-2 border-0">
+              Go to Sign In
+            </Link>
+          </div>
+        )}
+
         <p className="eyebrow">Contribute to the journal</p>
         <h1>Tell us what<br/><i>you saw.</i></h1>
 
