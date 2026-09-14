@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { User } from 'firebase/auth'
 import { ChevronLeft, Camera, Save } from 'lucide-react'
 import Link from 'next/link'
 
@@ -20,7 +21,30 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
+  const [fetchUser, setFetchUser] = useState<User | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const loadProfile = async (user: User) => {
+    setLoading(true)
+    setFetchError(false)
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid))
+      if (snap.exists()) {
+        const data = snap.data()
+        setDisplayName(data.displayName || user.displayName || '')
+        setBio(data.bio || '')
+        setPhotoURL(data.photoURL || null)
+      } else {
+        setDisplayName(user.displayName || '')
+      }
+    } catch (err) {
+      console.error('Failed to load profile:', err)
+      setFetchError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     params.then(async ({ uid: paramUid }) => {
@@ -34,18 +58,8 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
           return
         }
         setUid(user.uid)
-
-        // Load existing profile
-        const snap = await getDoc(doc(db, 'users', user.uid))
-        if (snap.exists()) {
-          const data = snap.data()
-          setDisplayName(data.displayName || user.displayName || '')
-          setBio(data.bio || '')
-          setPhotoURL(data.photoURL || null)
-        } else {
-          setDisplayName(user.displayName || '')
-        }
-        setLoading(false)
+        setFetchUser(user)
+        loadProfile(user)
       })
       return () => unsubscribe()
     })
@@ -123,6 +137,15 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#304936] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#fbfaf6]">
+        <p className="text-red-600 mb-4 font-serif text-lg">Failed to load profile data.</p>
+        <button onClick={() => fetchUser && loadProfile(fetchUser)} className="dark-button">Retry</button>
       </div>
     )
   }
