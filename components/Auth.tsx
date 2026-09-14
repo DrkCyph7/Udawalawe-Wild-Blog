@@ -57,7 +57,7 @@ export function Auth({ signup }: { signup?: boolean }) {
         <img src="/blog/auth-bg.png" alt="Wild elephant in the forest"/>
         <div>
           <span className="brand-mark">
-            <Image src="/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
+            <Image src="/blog/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
           </span>
           <p>Join a community<br/><i>that looks closer.</i></p>
         </div>
@@ -117,7 +117,7 @@ export function Auth({ signup }: { signup?: boolean }) {
 
           <p className="switch mt-6">
             {signup ? 'Already a member?' : 'New to Udawalawe Wild?'} 
-            <Link href={signup ? '/blog/login' : '/blog/signup'} className="ml-2 font-medium text-black">
+            <Link href={signup ? '/login' : '/signup'} className="ml-2 font-medium text-black">
               {signup ? 'Sign in' : 'Join the community'}
             </Link>
           </p>

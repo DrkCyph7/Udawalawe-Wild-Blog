@@ -24,7 +24,7 @@ export function PostEditButton({ authorId, postId }: { authorId: string, postId:
 
   return (
     <Link 
-      href={`/blog/${postId}/edit`} 
+      href={`/${postId}/edit`} 
       className="inline-flex items-center gap-1.5 ml-4 text-xs font-semibold text-[#304936] hover:underline"
     >
       <FileEdit size={13}/>

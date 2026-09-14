@@ -175,7 +175,7 @@ export default function EditStory() {
   return (
     <main className="new-page">
       <div className="new-top">
-        <Link href={`/blog/${id}`} className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Cancel</Link>
+        <Link href={`/${id}`} className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Cancel</Link>
         <span className="save-status">
           {post?.status === 'approved' && post?.visibility === 'public' 
             ? 'Edits to public posts will be reviewed.' 

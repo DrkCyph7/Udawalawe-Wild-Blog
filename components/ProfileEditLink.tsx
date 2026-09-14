@@ -19,7 +19,7 @@ export function ProfileEditLink({ uid }: { uid: string }) {
   if (!isOwner) return null
 
   return (
-    <Link href={`/blog/profile/${uid}/edit`} className="profile-edit-link">
+    <Link href={`/profile/${uid}/edit`} className="profile-edit-link">
       <Pencil size={12}/> Edit profile
     </Link>
   )

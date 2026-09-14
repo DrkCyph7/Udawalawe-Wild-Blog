@@ -132,7 +132,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ uid: str
 
   return (
     <main className="edit-profile-page">
-      <Link href={`/blog/profile/${uid}`} className="back-link !inline-flex items-center">
+      <Link href={`/profile/${uid}`} className="back-link !inline-flex items-center">
         <ChevronLeft size={16} /> Back to profile
       </Link>
 

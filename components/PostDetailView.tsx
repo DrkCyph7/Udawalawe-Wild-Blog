@@ -30,7 +30,7 @@ export function PostDetailView({ post }: { post: BlogPost }) {
             <span className="avatar large">{displayName.charAt(0)}</span>
             <div>
               {canLinkToProfile ? (
-                <Link href={`/blog/profile/${post.authorId}`} className="author-link font-semibold text-sm">
+                <Link href={`/profile/${post.authorId}`} className="author-link font-semibold text-sm">
                   {displayName}
                 </Link>
               ) : (

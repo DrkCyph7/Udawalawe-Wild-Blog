@@ -23,7 +23,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
 
   return (
     <article className="blog-card">
-      <Link href={`/blog/${post.id}`} className="image-button block">
+      <Link href={`/${post.id}`} className="image-button block">
         {post.images && post.images.length > 0 ? (
           <img src={post.images[0]} alt={post.title} loading="lazy" />
         ) : (
@@ -40,7 +40,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
         <div className="meta">
           <span>{dateStr}</span><span>·</span><span>{readTime} min read</span>
         </div>
-        <Link href={`/blog/${post.id}`} className="card-title block">
+        <Link href={`/${post.id}`} className="card-title block">
           {post.title}
         </Link>
         <p>{excerpt}</p>
@@ -48,7 +48,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
           <span className="author">
             <span className="avatar">{displayName.charAt(0)}</span>
             {canLinkToProfile ? (
-              <Link href={`/blog/profile/${post.authorId}`} className="author-link">
+              <Link href={`/profile/${post.authorId}`} className="author-link">
                 {displayName}
               </Link>
             ) : (
