@@ -82,7 +82,7 @@ export default function NewStory() {
 
       // Submit via Cloud Function (handles rate limit atomically server-side)
       setProgress('Submitting…')
-      await callSubmitPost({
+      const payload = {
         title: title.trim(),
         body: content,
         images: imageUrls,
@@ -90,7 +90,20 @@ export default function NewStory() {
         ...(type === 'Review' && { rating }),
         isAnonymous,
         visibility,
-      })
+      }
+      try {
+        await callSubmitPost(payload)
+      } catch (innerErr: any) {
+        const msg = innerErr?.message || innerErr?.details || innerErr?.code || ''
+        if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('unauthenticated')) {
+          setProgress('Refreshing session…')
+          await auth.currentUser?.getIdToken(true)
+          setProgress('Submitting…')
+          await callSubmitPost(payload)
+        } else {
+          throw innerErr
+        }
+      }
 
       router.push('/success')
     } catch (err: any) {

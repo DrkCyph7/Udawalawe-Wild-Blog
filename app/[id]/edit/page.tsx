@@ -125,20 +125,22 @@ export default function EditStory() {
         ...(type === 'Review' && { rating }),
       }
 
-      // Direct edit is only allowed if it is still pending
-      if (post.status === 'pending') {
-        await updateDoc(docRef, {
-          ...editData,
-          visibility, 
-          updatedAt: serverTimestamp()
-        })
-      } else {
-        // Post is approved. Requires a pendingEdit.
-        await updateDoc(docRef, {
-          pendingEdit: editData,
-          visibility, 
-          updatedAt: serverTimestamp()
-        })
+      const updatePayload = post.status === 'pending'
+        ? { ...editData, visibility, updatedAt: serverTimestamp() }
+        : { pendingEdit: editData, visibility, updatedAt: serverTimestamp() }
+
+      try {
+        await updateDoc(docRef, updatePayload)
+      } catch (innerErr: any) {
+        const msg = innerErr?.message || innerErr?.details || innerErr?.code || ''
+        if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('unauthenticated')) {
+          setProgress('Refreshing session…')
+          await auth.currentUser?.getIdToken(true)
+          setProgress('Saving edit…')
+          await updateDoc(docRef, updatePayload)
+        } else {
+          throw innerErr
+        }
       }
 
       router.refresh()
