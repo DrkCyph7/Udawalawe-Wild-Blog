@@ -17,6 +17,7 @@ export default function BlogQueue() {
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({})
   const [rejectionReason, setRejectionReason] = useState<Record<string, string>>({})
   const [pendingCount, setPendingCount] = useState(0)
   const [reportedCount, setReportedCount] = useState(0)
@@ -86,20 +87,28 @@ export default function BlogQueue() {
 
   const doAction = async (postId: string, action: Parameters<typeof callAdminModeratePost>[1], reason?: string) => {
     setActionLoading(postId + action)
+    setActionErrors(prev => ({ ...prev, [postId]: '' }))
     try {
       await callAdminModeratePost(postId, action, reason)
       setPosts(prev => prev.filter(p => p.id !== postId))
-    } catch (e) { console.error(e) }
+    } catch (e: any) {
+      console.error(e)
+      setActionErrors(prev => ({ ...prev, [postId]: e.message || 'Action failed.' }))
+    }
     finally { setActionLoading(null) }
   }
 
   const doDelete = async (postId: string) => {
     if (!confirm('Soft-delete this post? It will be hidden from all public views but retained for audit.')) return
     setActionLoading(postId + 'delete')
+    setActionErrors(prev => ({ ...prev, [postId]: '' }))
     try {
       await callAdminDeletePost(postId)
       setPosts(prev => prev.filter(p => p.id !== postId))
-    } catch (e) { console.error(e) }
+    } catch (e: any) {
+      console.error(e)
+      setActionErrors(prev => ({ ...prev, [postId]: e.message || 'Delete failed.' }))
+    }
     finally { setActionLoading(null) }
   }
 
@@ -278,6 +287,11 @@ export default function BlogQueue() {
                     <Trash2 size={13}/> Delete
                   </button>
                 </div>
+                {actionErrors[post.id] && (
+                  <div className="w-full mt-2 text-xs text-red-600 bg-red-50 p-2 border border-red-200">
+                    {actionErrors[post.id]}
+                  </div>
+                )}
               </div>
             )
           })
