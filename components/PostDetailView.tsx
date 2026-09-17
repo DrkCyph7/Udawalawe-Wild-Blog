@@ -5,8 +5,9 @@ import { ReportButton } from '@/components/ReportButton'
 import Link from 'next/link'
 import { BlogPost } from '@/lib/types'
 import { PostEditButton } from '@/components/PostEditButton'
+import { BlogCard } from '@/components/BlogCard'
 
-export function PostDetailView({ post }: { post: BlogPost }) {
+export function PostDetailView({ post, relatedPosts }: { post: BlogPost; relatedPosts?: BlogPost[] }) {
   const dateObj = new Date(post.createdAt)
   const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   const rawText = post.body.replace(/<[^>]*>?/gm, '')
@@ -80,7 +81,7 @@ export function PostDetailView({ post }: { post: BlogPost }) {
       </div>
 
       <div className="article-layout">
-        <article className="article-body">
+        <article className="article-body" style={{ gridRow: 1, gridColumn: 1 }}>
           <div
             className="article-content"
             dangerouslySetInnerHTML={{ __html: post.body }}
@@ -117,7 +118,16 @@ export function PostDetailView({ post }: { post: BlogPost }) {
           </div>
         </article>
 
-        <aside className="review-card">
+        {relatedPosts && relatedPosts.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-[var(--line)]" style={{ gridRow: 2, gridColumn: '1 / -1' }}>
+            <h2 className="text-3xl font-serif text-[var(--forest)] mb-8">More from the field</h2>
+            <div className="post-grid">
+              {relatedPosts.map(p => <BlogCard key={p.id} post={p} />)}
+            </div>
+          </div>
+        )}
+
+        <aside className="review-card" style={{ gridRow: 1, gridColumn: 2 }}>
           <h3>Have you been here?</h3>
           <p>Share your experience with fellow explorers.</p>
           <Link href="/new" className="dark-button full !inline-flex justify-center items-center gap-2">

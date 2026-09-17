@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { BlogPost } from '@/lib/types'
-import { SortControl } from '@/components/SortControl'
-import { CategoryChips } from '@/components/CategoryChips'
+import { FilteredPostListing } from '@/components/FilteredPostListing'
 import { AVAILABLE_TAGS } from '@/lib/constants/categories'
 import { redirect } from 'next/navigation'
 
@@ -79,28 +78,24 @@ export default async function CategoryPage(props: {
   return (
     <main>
       <section className="listing pt-12 lg:pt-20" id="stories">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow"><span className="eyebrow-line"/> Category</p>
-            <h2>{category.label} <i>({initialPosts.length})</i></h2>
-          </div>
-          <SortControl currentSort={sort} />
-        </div>
-
-        <CategoryChips />
-
-        <div className="post-grid">
-          {initialPosts.length === 0 ? (
+        <FilteredPostListing
+          initialPosts={initialPosts}
+          currentSort={sort}
+          headerLeft={
+            <div>
+              <p className="eyebrow"><span className="eyebrow-line"/> Category</p>
+              <h2>{category.label} <i>({initialPosts.length})</i></h2>
+            </div>
+          }
+          emptyStateNoPosts={
             <div className="col-span-full py-20 text-center flex flex-col items-center">
               <p className="text-[#768078] font-serif text-lg mb-2">No stories tagged <strong>{category.label}</strong> yet — be the first to share one!</p>
               <Link href="/new" className="dark-button !inline-flex mt-6 items-center gap-2">
                 Share a story <Camera size={15}/>
               </Link>
             </div>
-          ) : (
-            initialPosts.map(post => <BlogCard key={post.id} post={post} />)
-          )}
-        </div>
+          }
+        />
       </section>
     </main>
   )

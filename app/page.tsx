@@ -1,11 +1,9 @@
 import { ArrowRight, Camera } from 'lucide-react'
-import { BlogCard } from '@/components/BlogCard'
-import Link from 'next/link'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { BlogPost } from '@/lib/types'
-import { SortControl } from '@/components/SortControl'
-import { CategoryChips } from '@/components/CategoryChips'
+import Link from 'next/link'
+import { FilteredPostListing } from '@/components/FilteredPostListing'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,28 +81,24 @@ export default async function BlogListingPage({
       </section>
 
       <section className="listing" id="stories">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow"><span className="eyebrow-line"/> Community stories</p>
-            <h2>From the <i>field.</i></h2>
-          </div>
-          <SortControl currentSort={sort} />
-        </div>
-
-        <CategoryChips />
-
-        <div className="post-grid">
-          {initialPosts.length === 0 ? (
+        <FilteredPostListing
+          initialPosts={initialPosts}
+          currentSort={sort}
+          headerLeft={
+            <div>
+              <p className="eyebrow"><span className="eyebrow-line"/> Community stories</p>
+              <h2>From the <i>field.</i></h2>
+            </div>
+          }
+          emptyStateNoPosts={
             <div className="col-span-full py-20 text-center">
               <p className="text-[#768078] font-serif text-lg">No stories yet. Be the first to share!</p>
               <Link href="/new" className="dark-button !inline-flex mt-6">
                 Share a story <Camera size={15}/>
               </Link>
             </div>
-          ) : (
-            initialPosts.map(post => <BlogCard key={post.id} post={post} />)
-          )}
-        </div>
+          }
+        />
       </section>
 
       <section className="join-banner">

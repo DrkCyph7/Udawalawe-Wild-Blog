@@ -1,4 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { BlogPost } from '@/lib/types'
 import { notFound } from 'next/navigation'
@@ -89,6 +89,89 @@ export default async function PostDetailPage({ params }: Props) {
 
   if (!post) notFound()
 
+  let relatedPosts: BlogPost[] = []
+  try {
+    const postsRef = collection(db, 'posts')
+    const fetchedDocs: any[] = []
+
+    const currentTags = post.tags || []
+    if (currentTags.length > 0) {
+      const tagsToQuery = currentTags.slice(0, 10)
+      const q = query(
+        postsRef,
+        where('status', '==', 'approved'),
+        where('visibility', '==', 'public'),
+        where('tags', 'array-contains-any', tagsToQuery),
+        limit(20)
+      )
+      const querySnapshot = await getDocs(q)
+      querySnapshot.forEach(doc => {
+        if (doc.id !== post!.id) {
+          fetchedDocs.push({ id: doc.id, ...doc.data() })
+        }
+      })
+    }
+
+    fetchedDocs.sort((a, b) => {
+      const aTags = a.tags || []
+      const bTags = b.tags || []
+      const aCommon = aTags.filter((t: string) => currentTags.includes(t)).length
+      const bCommon = bTags.filter((t: string) => currentTags.includes(t)).length
+      if (aCommon !== bCommon) {
+        return bCommon - aCommon
+      }
+      const aDate = a.createdAt?.toDate().getTime() || 0
+      const bDate = b.createdAt?.toDate().getTime() || 0
+      return bDate - aDate
+    })
+
+    relatedPosts = fetchedDocs.slice(0, 3)
+
+    if (relatedPosts.length < 3) {
+      const qRecent = query(
+        postsRef,
+        where('status', '==', 'approved'),
+        where('visibility', '==', 'public'),
+        orderBy('createdAt', 'desc'),
+        limit(10)
+      )
+      const recentSnapshot = await getDocs(qRecent)
+      recentSnapshot.forEach(doc => {
+        if (relatedPosts.length >= 3) return
+        if (doc.id !== post!.id && !relatedPosts.some(p => p.id === doc.id)) {
+          relatedPosts.push({ id: doc.id, ...doc.data() })
+        }
+      })
+    }
+
+    relatedPosts = relatedPosts.map(data => ({
+      id: data.id,
+      authorId: data.authorId,
+      authorName: data.authorName,
+      authorPhotoURL: data.authorPhotoURL || null,
+      isAnonymous: data.isAnonymous ?? false,
+      visibility: data.visibility ?? 'public',
+      title: data.title,
+      body: data.body,
+      images: data.images || [],
+      tags: data.tags || [],
+      type: data.type,
+      rating: data.rating,
+      status: data.status,
+      likes: data.likes ?? 0,
+      likedBy: data.likedBy ?? [],
+      reportCount: data.reportCount ?? 0,
+      reportedBy: data.reportedBy ?? [],
+      pendingEdit: data.pendingEdit ?? null,
+      deletedAt: data.deletedAt ?? null,
+      deletedBy: data.deletedBy ?? null,
+      createdAt: data.createdAt?.toDate().toISOString(),
+      updatedAt: data.updatedAt?.toDate().toISOString(),
+    } as BlogPost))
+  } catch (error) {
+    console.error('Error fetching related posts:', error)
+  }
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -101,7 +184,7 @@ export default async function PostDetailPage({ params }: Props) {
         author: [{ '@type': 'Person', name: post.isAnonymous ? 'Anonymous' : (post.authorName || 'Explorer') }],
         abstract: post.body.replace(/<[^>]*>?/gm, '').substring(0, 200),
       }) }} />
-      <PostDetailView post={post} />
+      <PostDetailView post={post} relatedPosts={relatedPosts} />
     </>
   )
 }

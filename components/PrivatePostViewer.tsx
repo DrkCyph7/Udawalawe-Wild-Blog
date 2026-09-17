@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { BlogPost } from '@/lib/types'
@@ -11,6 +11,7 @@ import { ChevronLeft } from 'lucide-react'
 
 export function PrivatePostViewer({ id }: { id: string }) {
   const [post, setPost] = useState<BlogPost | null>(null)
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -28,7 +29,7 @@ export function PrivatePostViewer({ id }: { id: string }) {
         
         if (docSnap.exists()) {
           const data = docSnap.data()
-          setPost({
+          const currentPost = {
             id: docSnap.id,
             authorId: data.authorId,
             authorName: data.authorName,
@@ -37,6 +38,7 @@ export function PrivatePostViewer({ id }: { id: string }) {
             title: data.title,
             body: data.body,
             images: data.images || [],
+            tags: data.tags || [],
             type: data.type,
             rating: data.rating,
             status: data.status,
@@ -49,7 +51,90 @@ export function PrivatePostViewer({ id }: { id: string }) {
             deletedBy: data.deletedBy ?? null,
             createdAt: data.createdAt?.toDate().toISOString(),
             updatedAt: data.updatedAt?.toDate().toISOString(),
-          } as BlogPost)
+          } as BlogPost
+          setPost(currentPost)
+
+          // Fetch related stories
+          const postsRef = collection(db, 'posts')
+          const fetchedDocs: any[] = []
+          const currentTags = currentPost.tags || []
+
+          if (currentTags.length > 0) {
+            const tagsToQuery = currentTags.slice(0, 10)
+            const q = query(
+              postsRef,
+              where('status', '==', 'approved'),
+              where('visibility', '==', 'public'),
+              where('tags', 'array-contains-any', tagsToQuery),
+              limit(20)
+            )
+            const querySnapshot = await getDocs(q)
+            querySnapshot.forEach(d => {
+              if (d.id !== currentPost.id) {
+                fetchedDocs.push({ id: d.id, ...d.data() })
+              }
+            })
+          }
+
+          fetchedDocs.sort((a, b) => {
+            const aTags = a.tags || []
+            const bTags = b.tags || []
+            const aCommon = aTags.filter((t: string) => currentTags.includes(t)).length
+            const bCommon = bTags.filter((t: string) => currentTags.includes(t)).length
+            if (aCommon !== bCommon) {
+              return bCommon - aCommon
+            }
+            const aDate = a.createdAt?.toDate().getTime() || 0
+            const bDate = b.createdAt?.toDate().getTime() || 0
+            return bDate - aDate
+          })
+
+          let relPosts = fetchedDocs.slice(0, 3)
+
+          if (relPosts.length < 3) {
+            const qRecent = query(
+              postsRef,
+              where('status', '==', 'approved'),
+              where('visibility', '==', 'public'),
+              orderBy('createdAt', 'desc'),
+              limit(10)
+            )
+            const recentSnapshot = await getDocs(qRecent)
+            recentSnapshot.forEach(d => {
+              if (relPosts.length >= 3) return
+              if (d.id !== currentPost.id && !relPosts.some((p: any) => p.id === d.id)) {
+                relPosts.push({ id: d.id, ...d.data() })
+              }
+            })
+          }
+
+          const finalRelated = relPosts.map((rData: any) => ({
+            id: rData.id,
+            authorId: rData.authorId,
+            authorName: rData.authorName,
+            authorPhotoURL: rData.authorPhotoURL || null,
+            isAnonymous: rData.isAnonymous ?? false,
+            visibility: rData.visibility ?? 'public',
+            title: rData.title,
+            body: rData.body,
+            images: rData.images || [],
+            tags: rData.tags || [],
+            type: rData.type,
+            rating: rData.rating,
+            status: rData.status,
+            likes: rData.likes ?? 0,
+            likedBy: rData.likedBy ?? [],
+            reportCount: rData.reportCount ?? 0,
+            reportedBy: rData.reportedBy ?? [],
+            pendingEdit: rData.pendingEdit ?? null,
+            deletedAt: rData.deletedAt ?? null,
+            deletedBy: rData.deletedBy ?? null,
+            createdAt: rData.createdAt?.toDate().toISOString(),
+            updatedAt: rData.updatedAt?.toDate().toISOString(),
+          })) as BlogPost[]
+
+          setRelatedPosts(finalRelated)
+
         } else {
           setError(true)
         }
@@ -86,5 +171,5 @@ export function PrivatePostViewer({ id }: { id: string }) {
     )
   }
 
-  return <PostDetailView post={post} />
+  return <PostDetailView post={post} relatedPosts={relatedPosts} />
 }
