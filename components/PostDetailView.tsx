@@ -48,6 +48,31 @@ export function PostDetailView({ post }: { post: BlogPost }) {
               <Rating value={post.rating} large/>
             )}
           </div>
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {post.tags.map(tagSlug => {
+                const tagObj = [
+                  { label: 'Elephants', slug: 'elephants' },
+                  { label: 'Birdlife', slug: 'birdlife' },
+                  { label: 'Park Tips', slug: 'park-tips' },
+                  { label: 'Photography', slug: 'photography' },
+                  { label: 'Conservation', slug: 'conservation' },
+                  { label: 'Wildlife Sightings', slug: 'wildlife-sightings' },
+                  { label: 'Culture & Community', slug: 'culture-community' },
+                ].find(t => t.slug === tagSlug);
+                
+                return (
+                  <Link 
+                    key={tagSlug} 
+                    href={`/blog/category/${tagSlug}`}
+                    className="bg-[#e9e5d9] hover:bg-[#d8d5ca] text-[#304936] px-3 py-1 text-xs font-semibold rounded-full transition-colors inline-block"
+                  >
+                    {tagObj?.label || tagSlug}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
         {post.images && post.images.length > 0 && (
           <img src={post.images[0]} alt={post.title} />

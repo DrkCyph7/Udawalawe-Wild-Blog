@@ -9,6 +9,8 @@ export interface Post {
   title: string;
   body: string; // Rich text or markdown content
   images: string[]; // Array of image URLs
+  tags: string[];
+  featured: boolean;
   type: PostType;
   rating?: number; // Only for reviews (1-5 stars)
   status: PostStatus;

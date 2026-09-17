@@ -8,6 +8,8 @@ export type BlogPost = {
   title: string;
   body: string;
   images: string[];
+  tags: string[];
+  featured?: boolean;
   type: 'Blog Post' | 'Review';
   rating?: number;
   status: 'pending' | 'approved' | 'rejected' | 'deleted';

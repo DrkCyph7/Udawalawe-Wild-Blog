@@ -8,10 +8,12 @@ import { callSubmitPost } from '@/lib/functions'
 import { Editor } from '@/components/Editor'
 import { ImageUpload } from '@/components/ImageUpload'
 import { StarRating } from '@/components/StarRating'
-import { ChevronLeft, Send, Lock, Globe, EyeOff } from 'lucide-react'
+import { ChevronLeft, Send, Lock, Globe, EyeOff, X, Tag } from 'lucide-react'
 import Link from 'next/link'
 
 type PostType = 'Blog Post' | 'Review'
+
+import { AVAILABLE_TAGS } from '@/lib/constants/categories'
 
 export default function NewStory() {
   const router = useRouter()
@@ -20,6 +22,7 @@ export default function NewStory() {
   const [content, setContent] = useState('')
   const [images, setImages] = useState<File[]>([])
   const [rating, setRating] = useState(0)
+  const [tags, setTags] = useState<string[]>([])
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [visibility, setVisibility] = useState<'public' | 'private'>('public')
 
@@ -68,6 +71,10 @@ export default function NewStory() {
       setError('Please fill in all required fields.')
       return
     }
+    if (tags.length === 0) {
+      setError('Please select at least one tag.')
+      return
+    }
 
     setIsSubmitting(true)
     setError('')
@@ -86,6 +93,7 @@ export default function NewStory() {
         title: title.trim(),
         body: content,
         images: imageUrls,
+        tags,
         type,
         ...(type === 'Review' && { rating }),
         isAnonymous,
@@ -169,6 +177,43 @@ export default function NewStory() {
 
         <div className="mt-4">
           <ImageUpload images={images} onChange={setImages} />
+        </div>
+
+        {/* Tags */}
+        <div className="mt-7">
+          <p className="text-[#667957] text-[10px] uppercase tracking-[0.12em] flex items-center gap-1.5 margin-0 mb-2.5 font-bold">
+            <Tag size={13}/> Tags <span className="font-normal normal-case tracking-normal ml-auto">(choose 1-4)</span>
+          </p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {tags.map(tagSlug => {
+              const tagObj = AVAILABLE_TAGS.find(t => t.slug === tagSlug)
+              return (
+                <span key={tagSlug} className="inline-flex items-center gap-1 bg-[#e9e5d9] text-[#304936] px-2 py-1 text-xs rounded-full">
+                  {tagObj?.label || tagSlug}
+                  <button
+                    type="button"
+                    onClick={() => setTags(tags.filter(t => t !== tagSlug))}
+                    className="border-0 bg-transparent text-[#768078] hover:text-red-600 p-0 cursor-pointer"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              )
+            })}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {AVAILABLE_TAGS.filter(t => !tags.includes(t.slug)).map(tag => (
+              <button
+                key={tag.slug}
+                type="button"
+                disabled={tags.length >= 4}
+                onClick={() => setTags([...tags, tag.slug])}
+                className="border border-[#d8d5ca] bg-white text-[#526356] px-2 py-1 text-xs rounded-full hover:bg-[#fbfaf6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                + {tag.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Privacy & Visibility controls */}

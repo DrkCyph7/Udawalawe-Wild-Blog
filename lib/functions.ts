@@ -91,6 +91,7 @@ export const callSubmitPost = async (postData: {
   title: string;
   body: string;
   images: string[];
+  tags: string[];
   type: 'Blog Post' | 'Review';
   rating?: number;
   isAnonymous: boolean;
@@ -102,6 +103,9 @@ export const callSubmitPost = async (postData: {
 
   if (!postData.title?.trim() || !postData.body?.trim()) {
     throw new Error("Title and body are required.");
+  }
+  if (!postData.tags || postData.tags.length < 1 || postData.tags.length > 4) {
+    throw new Error("You must select between 1 and 4 tags.");
   }
   if (postData.type === 'Review' && (postData.rating === undefined || postData.rating < 1 || postData.rating > 5)) {
     throw new Error("Rating 1-5 required for reviews.");
@@ -141,6 +145,8 @@ export const callSubmitPost = async (postData: {
       title: postData.title.trim(),
       body: postData.body,
       images: postData.images || [],
+      tags: postData.tags || [],
+      featured: false,
       type: postData.type,
       ...(postData.type === 'Review' && { rating: postData.rating }),
       status: 'pending',
@@ -273,5 +279,21 @@ export const callSubmitEdit = async (
     });
   });
   
+  return { data: { success: true } };
+}
+
+export const callAdminUpdatePost = async (
+  postId: string,
+  updates: { tags?: string[]; featured?: boolean }
+) => {
+  const uid = auth?.currentUser?.uid;
+  if (!uid || !(await isAdmin(uid))) throw new Error("Admins only.");
+
+  const postRef = doc(db, 'posts', postId);
+  await updateDoc(postRef, {
+    ...updates,
+    updatedAt: serverTimestamp()
+  });
+
   return { data: { success: true } };
 }

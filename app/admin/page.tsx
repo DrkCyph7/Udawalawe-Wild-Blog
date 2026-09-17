@@ -4,9 +4,19 @@ import { useState, useEffect } from 'react'
 import { collection, query, where, getDocs, getDoc, onSnapshot, doc } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
 import { onAuthStateChanged, User } from 'firebase/auth'
-import { callAdminModeratePost, callAdminDeletePost } from '@/lib/functions'
-import { Trash2, Check, X, Bell, FileEdit } from 'lucide-react'
+import { callAdminModeratePost, callAdminDeletePost, callAdminUpdatePost } from '@/lib/functions'
+import { Trash2, Check, X, Bell, FileEdit, Tag, Star } from 'lucide-react'
 import type { BlogPost } from '@/lib/types'
+
+const AVAILABLE_TAGS = [
+  { label: 'Elephants', slug: 'elephants' },
+  { label: 'Birdlife', slug: 'birdlife' },
+  { label: 'Park Tips', slug: 'park-tips' },
+  { label: 'Photography', slug: 'photography' },
+  { label: 'Conservation', slug: 'conservation' },
+  { label: 'Wildlife Sightings', slug: 'wildlife-sightings' },
+  { label: 'Culture & Community', slug: 'culture-community' },
+];
 
 type Tab = 'pending' | 'approved' | 'reported'
 
@@ -119,6 +129,31 @@ export default function BlogQueue() {
     finally { setActionLoading(null) }
   }
 
+  const toggleTag = async (postId: string, currentTags: string[] = [], tagSlug: string) => {
+    const newTags = currentTags.includes(tagSlug)
+      ? currentTags.filter(t => t !== tagSlug)
+      : [...currentTags, tagSlug];
+    
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, tags: newTags } : p));
+    try {
+      await callAdminUpdatePost(postId, { tags: newTags });
+    } catch (e) {
+      console.error(e);
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, tags: currentTags } : p));
+    }
+  }
+
+  const toggleFeatured = async (postId: string, currentFeatured = false) => {
+    const newFeatured = !currentFeatured;
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, featured: newFeatured } : p));
+    try {
+      await callAdminUpdatePost(postId, { featured: newFeatured });
+    } catch (e) {
+      console.error(e);
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, featured: currentFeatured } : p));
+    }
+  }
+
   if (isAdmin === null || (isAdmin && loading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f9f8f4]">
@@ -226,6 +261,45 @@ export default function BlogQueue() {
 
                 <div className="admin-preview">
                   <div dangerouslySetInnerHTML={{ __html: post.body }} className="line-clamp-4 text-sm text-[#526356] font-serif" />
+                </div>
+
+                <div className="w-full flex flex-col gap-2 mt-2 bg-gray-50 p-3 rounded-md border border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <Tag size={14} className="text-gray-500" />
+                    <span className="text-xs font-semibold text-gray-700">Tags:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {AVAILABLE_TAGS.map(tag => {
+                        const isSelected = post.tags?.includes(tag.slug);
+                        return (
+                          <button
+                            key={tag.slug}
+                            onClick={() => toggleTag(post.id, post.tags, tag.slug)}
+                            className={`border px-2 py-0.5 text-[10px] rounded-full transition-colors ${
+                              isSelected 
+                                ? 'bg-[#304936] text-white border-[#304936]' 
+                                : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'
+                            }`}
+                          >
+                            {tag.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star size={14} className="text-gray-500" />
+                    <span className="text-xs font-semibold text-gray-700">Featured:</span>
+                    <button
+                      onClick={() => toggleFeatured(post.id, post.featured)}
+                      className={`border px-2 py-0.5 text-[10px] rounded-full transition-colors ${
+                        post.featured
+                          ? 'bg-amber-500 text-white border-amber-500'
+                          : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100'
+                      }`}
+                    >
+                      {post.featured ? 'Yes' : 'No'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Pending Edit indicator */}
