@@ -53,6 +53,7 @@ export default async function PostDetailPage({ params }: Props) {
           id: docSnap.id,
           authorId: data.authorId,
           authorName: data.authorName,
+          authorPhotoURL: data.authorPhotoURL || null,
           isAnonymous: data.isAnonymous ?? false,
           visibility: data.visibility ?? 'public',
           title: data.title,
