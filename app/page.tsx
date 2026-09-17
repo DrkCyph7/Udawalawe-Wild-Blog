@@ -1,9 +1,11 @@
 import { ArrowRight, Camera } from 'lucide-react'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { collection, query, where, getDocs, getCountFromServer } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { BlogPost } from '@/lib/types'
 import Link from 'next/link'
 import { FilteredPostListing } from '@/components/FilteredPostListing'
+import { StatsBar } from '@/components/StatsBar'
+import { FeaturedPostCard } from '@/components/FeaturedPostCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +16,7 @@ export default async function BlogListingPage({
 }) {
   const { sort = 'newest' } = await searchParams
   let initialPosts: BlogPost[] = []
+  let totalApprovedCount = 0;
 
   try {
     const q = query(
@@ -21,6 +24,13 @@ export default async function BlogListingPage({
       where('status', '==', 'approved'),
       where('visibility', '==', 'public')
     )
+
+    try {
+      const countSnapshot = await getCountFromServer(q);
+      totalApprovedCount = countSnapshot.data().count;
+    } catch (e) {
+      console.warn('Count query failed, falling back to array length', e);
+    }
 
     const querySnapshot = await getDocs(q)
     initialPosts = querySnapshot.docs
@@ -36,6 +46,8 @@ export default async function BlogListingPage({
           title: data.title,
           body: data.body,
           images: data.images || [],
+          tags: data.tags || [],
+          featured: data.featured ?? false,
           type: data.type,
           rating: data.rating,
           status: data.status,
@@ -50,6 +62,10 @@ export default async function BlogListingPage({
       // Exclude deleted and private
       .filter(p => p.status !== 'deleted' && p.visibility !== 'private')
 
+    if (!totalApprovedCount) {
+      totalApprovedCount = initialPosts.length;
+    }
+
     // Sort in memory (avoids needing composite indexes)
     if (sort === 'liked') {
       initialPosts.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
@@ -63,11 +79,34 @@ export default async function BlogListingPage({
     console.error('Error fetching blog posts:', error)
   }
 
-  const featured = initialPosts[0] || null
-  const rest = initialPosts.slice(1)
+  // We compute distinct contributors and categories from the fetched documents
+  // because Firestore does not support count(distinct) aggregations.
+  const uniqueContributors = new Set(initialPosts.map(p => p.authorId).filter(Boolean)).size;
+  const uniqueCategories = new Set(initialPosts.flatMap(p => p.tags || [])).size;
+
+  // Find the featured post. Sort by newest first to get the most recent explicitly featured post.
+  const newestFirst = [...initialPosts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const explicitFeatured = newestFirst.find(p => p.featured);
+  
+  // If there are > 3 posts and no explicit featured post, fall back to the newest one as featured. 
+  // If < 3, omit it to avoid a sparse regular grid.
+  const featuredPost = explicitFeatured || (initialPosts.length >= 3 ? newestFirst[0] : null);
+
+  const restPosts = featuredPost 
+    ? initialPosts.filter(p => p.id !== featuredPost.id)
+    : initialPosts;
+
+  const blogSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: 'Udawalawe Wild — Stories from the Wild',
+    description: 'A community journal for curious travelers, devoted naturalists, and everyone who feels at home under an open sky.',
+    url: 'https://udawalawe-wild-blog.vercel.app/'
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }} />
       <section className="hero">
         <div>
           <p className="eyebrow"><span className="eyebrow-line"/> Field notes from Sri Lanka</p>
@@ -80,9 +119,22 @@ export default async function BlogListingPage({
         </div>
       </section>
 
+      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+        <StatsBar 
+          stories={totalApprovedCount} 
+          contributors={uniqueContributors} 
+          categories={uniqueCategories} 
+        />
+      </div>
+
       <section className="listing" id="stories">
+        {featuredPost && (
+          <div className="mb-16">
+            <FeaturedPostCard post={featuredPost} />
+          </div>
+        )}
         <FilteredPostListing
-          initialPosts={initialPosts}
+          initialPosts={restPosts}
           currentSort={sort}
           headerLeft={
             <div>

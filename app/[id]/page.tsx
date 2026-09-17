@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { PostDetailView } from '@/components/PostDetailView'
 import { PrivatePostViewer } from '@/components/PrivatePostViewer'
+import { getExcerpt } from '@/lib/utils'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -15,8 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const docSnap = await getDoc(docRef)
     if (docSnap.exists()) {
       const data = docSnap.data()
-      const rawText = data.body?.replace(/<[^>]*>?/gm, '') || ''
-      const excerpt = rawText.length > 150 ? rawText.substring(0, 150) + '...' : rawText
+      const excerpt = getExcerpt(data.body, 150)
       return {
         title: `${data.title} | Udawalawe Wild Blog`,
         description: excerpt,
@@ -178,11 +178,12 @@ export default async function PostDetailPage({ params }: Props) {
         '@context': 'https://schema.org',
         '@type': 'Article',
         headline: post.title,
-        image: post.images,
+        image: post.images && post.images.length > 0 ? post.images : undefined,
         datePublished: post.createdAt,
         dateModified: post.updatedAt || post.createdAt,
-        author: [{ '@type': 'Person', name: post.isAnonymous ? 'Anonymous' : (post.authorName || 'Explorer') }],
-        abstract: post.body.replace(/<[^>]*>?/gm, '').substring(0, 200),
+        author: { '@type': 'Person', name: post.isAnonymous ? 'Anonymous' : (post.authorName || 'Explorer') },
+        description: getExcerpt(post.body, 150),
+        mainEntityOfPage: `https://udawalawe-wild-blog.vercel.app/${post.id}`
       }) }} />
       <PostDetailView post={post} relatedPosts={relatedPosts} />
     </>

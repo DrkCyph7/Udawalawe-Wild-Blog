@@ -3,17 +3,18 @@ import { Rating } from './Rating'
 import { Heart, Lock } from 'lucide-react'
 import { BlogPost } from '@/lib/types'
 import { PostEditButton } from './PostEditButton'
+import { getExcerpt } from '@/lib/utils'
 
 export function BlogCard({ post }: { post: BlogPost }) {
-  // Strip HTML for the excerpt
-  const rawText = post.body.replace(/<[^>]*>?/gm, '')
-  const excerpt = rawText.length > 150 ? rawText.substring(0, 150) + '...' : rawText
+  // Strip HTML for the excerpt safely
+  const excerpt = getExcerpt(post.body, 150)
 
   // Format date
   const dateObj = new Date(post.createdAt)
   const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 
   // Calculate read time
+  const rawText = post.body ? post.body.replace(/<[^>]+>/g, '') : ''
   const words = rawText.split(/\s+/).length
   const readTime = Math.max(1, Math.ceil(words / 200))
 

@@ -8,6 +8,15 @@ import { FilteredPostListing } from '@/components/FilteredPostListing'
 import { AVAILABLE_TAGS } from '@/lib/constants/categories'
 import { redirect } from 'next/navigation'
 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
 export const dynamic = 'force-dynamic'
 
 export default async function CategoryPage(props: {
@@ -75,9 +84,41 @@ export default async function CategoryPage(props: {
     console.error(`Error fetching posts for category ${slug}:`, error)
   }
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://udawalawe-wild-blog.vercel.app/' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://udawalawe-wild-blog.vercel.app/' },
+      { '@type': 'ListItem', position: 3, name: category.label, item: `https://udawalawe-wild-blog.vercel.app/category/${slug}` }
+    ]
+  };
+
   return (
     <main>
-      <section className="listing pt-12 lg:pt-20" id="stories">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <div className="max-w-6xl mx-auto px-6 lg:px-8 pt-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Blog</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{category.label}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      <section className="listing pt-8 lg:pt-12" id="stories">
         <FilteredPostListing
           initialPosts={initialPosts}
           currentSort={sort}

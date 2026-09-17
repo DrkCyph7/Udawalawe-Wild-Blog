@@ -6,21 +6,95 @@ import Link from 'next/link'
 import { BlogPost } from '@/lib/types'
 import { PostEditButton } from '@/components/PostEditButton'
 import { BlogCard } from '@/components/BlogCard'
+import { getExcerpt } from '@/lib/utils'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export function PostDetailView({ post, relatedPosts }: { post: BlogPost; relatedPosts?: BlogPost[] }) {
   const dateObj = new Date(post.createdAt)
   const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  const rawText = post.body.replace(/<[^>]*>?/gm, '')
-  const words = rawText.split(/\s+/).length
+  const rawText = post.body.replace(/<[^>]*>?/gm, ' ')
+  const words = rawText.split(/\s+/).filter(Boolean).length
   const readTime = Math.max(1, Math.ceil(words / 200))
-  const excerpt = rawText.length > 200 ? rawText.substring(0, 200) + '...' : rawText
+  const excerpt = getExcerpt(post.body, 200)
 
   const displayName = post.isAnonymous ? 'Anonymous' : (post.authorName || 'Explorer')
   const canLinkToProfile = !post.isAnonymous && !!post.authorId
 
+  const primaryTagSlug = post.tags?.[0];
+  const primaryTagObj = primaryTagSlug ? [
+    { label: 'Elephants', slug: 'elephants' },
+    { label: 'Birdlife', slug: 'birdlife' },
+    { label: 'Park Tips', slug: 'park-tips' },
+    { label: 'Photography', slug: 'photography' },
+    { label: 'Conservation', slug: 'conservation' },
+    { label: 'Wildlife Sightings', slug: 'wildlife-sightings' },
+    { label: 'Culture & Community', slug: 'culture-community' },
+  ].find(t => t.slug === primaryTagSlug) : null;
+
+  const titleTruncated = post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title;
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://udawalawe-wild-blog.vercel.app/' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://udawalawe-wild-blog.vercel.app/' },
+      ...(primaryTagObj ? [{ 
+        '@type': 'ListItem', 
+        position: 3, 
+        name: primaryTagObj.label, 
+        item: `https://udawalawe-wild-blog.vercel.app/category/${primaryTagObj.slug}` 
+      }] : []),
+      { 
+        '@type': 'ListItem', 
+        position: primaryTagObj ? 4 : 3, 
+        name: post.title, 
+        item: `https://udawalawe-wild-blog.vercel.app/${post.id}` 
+      }
+    ]
+  };
+
   return (
-    <main className="post-detail">
-      <Link href="/" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back to all stories</Link>
+    <main className="post-detail pt-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <div className="max-w-4xl mx-auto mb-6 px-6 lg:px-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Blog</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            {primaryTagObj && (
+              <>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href={`/category/${primaryTagObj.slug}`}>{primaryTagObj.label}</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+              </>
+            )}
+            <BreadcrumbItem>
+              <BreadcrumbPage>{titleTruncated}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
 
       <div className="detail-header">
         <div>
