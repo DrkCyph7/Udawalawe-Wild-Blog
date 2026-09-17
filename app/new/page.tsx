@@ -270,12 +270,12 @@ export default function NewStory() {
           </div>
         )}
 
-        <div className="submit-row mt-8">
+        <div className="submit-row mt-8 sticky bottom-0 z-20 bg-[#f7f5ef] pb-6 pt-4 sm:static sm:bg-transparent sm:pb-0 sm:pt-6 border-t border-[#d8d5ca]">
           <span>Stories are reviewed before publishing.</span>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="dark-button !inline-flex justify-center items-center gap-2 border-0 cursor-pointer disabled:opacity-50"
+            className="dark-button w-full sm:w-auto !inline-flex justify-center items-center gap-2 border-0 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>

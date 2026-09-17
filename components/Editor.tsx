@@ -68,7 +68,7 @@ export function Editor({ content, onChange }: EditorProps) {
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-center gap-1 p-2 border border-[#e2dfd5] border-b-0 rounded-t-md bg-[#f9f8f4]">
+      <div className="flex flex-nowrap md:flex-wrap items-center gap-1 p-2 border border-[#e2dfd5] border-b-0 rounded-t-md bg-[#f9f8f4] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} icon={Bold} title="Bold" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} icon={Italic} title="Italic" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} icon={Strikethrough} title="Strikethrough" />

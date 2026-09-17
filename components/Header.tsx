@@ -119,7 +119,9 @@ export function Header() {
 
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
-        <div className="absolute top-[78px] left-0 w-full bg-[#f7f5ef] border-b border-[#d8d5ca] shadow-lg flex flex-col px-6 py-8 gap-5 md:hidden z-50">
+        <>
+          <div className="fixed inset-0 top-[78px] bg-black/20 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
+          <div className="absolute top-[78px] left-0 w-full bg-[#f7f5ef] border-b border-[#d8d5ca] shadow-lg flex flex-col px-6 py-8 gap-5 md:hidden z-50 max-h-[calc(100vh-78px)] overflow-y-auto">
           <Link href="/" className={`text-[16px] font-medium ${pathname === '/' ? 'text-[#304936]' : 'text-[#768078]'}`}>Stories</Link>
           <Link href="/new" className={`text-[16px] font-medium ${pathname === '/new' ? 'text-[#304936]' : 'text-[#768078]'}`}>Share a story</Link>
           {isAdmin && (
@@ -148,7 +150,8 @@ export function Header() {
               <Link href="/signup" className="bg-[#304936] text-white py-3.5 px-4 rounded-[2px] text-center text-[13px] font-medium tracking-[0.03em] w-full">Join the community</Link>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </header>
   )

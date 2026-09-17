@@ -90,7 +90,7 @@ export function PostDetailView({ post, relatedPosts }: { post: BlogPost; related
               </>
             )}
             <BreadcrumbItem>
-              <BreadcrumbPage>{titleTruncated}</BreadcrumbPage>
+              <BreadcrumbPage className="max-w-[150px] md:max-w-none truncate">{titleTruncated}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -140,7 +140,7 @@ export function PostDetailView({ post, relatedPosts }: { post: BlogPost; related
                   <Link 
                     key={tagSlug} 
                     href={`/blog/category/${tagSlug}`}
-                    className="bg-[#e9e5d9] hover:bg-[#d8d5ca] text-[#304936] px-3 py-1 text-xs font-semibold rounded-full transition-colors inline-block"
+                    className="bg-[#e9e5d9] hover:bg-[#d8d5ca] text-[#304936] px-3 text-xs font-semibold rounded-full transition-colors inline-flex min-h-[44px] items-center justify-center"
                   >
                     {tagObj?.label || tagSlug}
                   </Link>
