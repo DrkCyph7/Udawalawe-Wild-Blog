@@ -86,7 +86,6 @@ export function Header() {
           )}
         </nav>
         <div className="nav-actions">
-          <button className="icon-button" aria-label="Search"><Search size={18}/></button>
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <Link href={`/profile/${user.uid}`} className="nav-profile-link">
@@ -117,42 +116,57 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      {isMenuOpen && (
-        <>
-          <div className="fixed inset-0 top-[78px] bg-black/20 z-40 md:hidden" onClick={() => setIsMenuOpen(false)} />
-          <div className="absolute top-[78px] left-0 w-full bg-[#f7f5ef] border-b border-[#d8d5ca] shadow-lg flex flex-col px-6 py-8 gap-5 md:hidden z-50 max-h-[calc(100vh-78px)] overflow-y-auto">
-          <Link href="/" className={`text-[16px] font-medium ${pathname === '/' ? 'text-[#304936]' : 'text-[#768078]'}`}>Stories</Link>
-          <Link href="/new" className={`text-[16px] font-medium ${pathname === '/new' ? 'text-[#304936]' : 'text-[#768078]'}`}>Share a story</Link>
+      {/* Next Level Mobile Nav Drawer */}
+      <div 
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        onClick={() => setIsMenuOpen(false)} 
+      />
+      <div 
+        className={`fixed top-0 right-0 h-full w-[85%] max-w-[340px] bg-[#f7f5ef] shadow-2xl flex flex-col px-8 py-10 gap-8 md:hidden z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <span className="brand-mark">
+            <Image src="/blog/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
+          </span>
+          <button 
+            className="text-[#768078] hover:text-[#304936] transition-colors p-2 -mr-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <X size={24}/>
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <Link href="/" className={`text-xl font-serif ${pathname === '/' ? 'text-[#304936]' : 'text-[#768078]'}`}>Stories</Link>
+          <Link href="/new" className={`text-xl font-serif ${pathname === '/new' ? 'text-[#304936]' : 'text-[#768078]'}`}>Share a story</Link>
           {isAdmin && (
-            <Link href="/admin" className={`text-[16px] font-medium ${pathname === '/admin' ? 'text-[#304936]' : 'text-[#768078]'}`}>Admin</Link>
+            <Link href="/admin" className={`text-xl font-serif ${pathname === '/admin' ? 'text-[#304936]' : 'text-[#768078]'}`}>Admin</Link>
           )}
-          
-          <hr className="border-[#d8d5ca] my-1" />
-          
-          {user ? (
-            <div className="flex flex-col gap-5">
-              <Link href={`/profile/${user.uid}`} className="text-[#304936] font-semibold flex items-center gap-3 text-[15px]">
-                {(userProfile?.photoURL || user.photoURL) ? (
-                  <img src={userProfile?.photoURL || user.photoURL || ''} alt="Profile" className="avatar flex-shrink-0 object-cover" />
-                ) : (
-                  <span className="avatar flex-shrink-0">{((userProfile?.displayName || user.displayName || user.email || 'U').charAt(0)).toUpperCase()}</span>
-                )}
-                {userProfile?.displayName || user.displayName || user.email?.split('@')[0]}
-              </Link>
-              <button onClick={handleLogout} className="text-[#768078] hover:text-[#304936] text-left text-[15px] font-medium flex items-center gap-2">
-                <LogOut size={16} /> Log out
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4 mt-2">
-              <Link href="/login" className="text-[15px] font-medium text-[#768078] text-center w-full py-2">Sign in</Link>
-              <Link href="/signup" className="bg-[#304936] text-white py-3.5 px-4 rounded-[2px] text-center text-[13px] font-medium tracking-[0.03em] w-full">Join the community</Link>
-            </div>
-          )}
+        </div>
+        
+        <hr className="border-[#d8d5ca] my-2" />
+        
+        {user ? (
+          <div className="flex flex-col gap-6">
+            <Link href={`/profile/${user.uid}`} className="text-[#304936] font-semibold flex items-center gap-4 text-[16px]">
+              {(userProfile?.photoURL || user.photoURL) ? (
+                <img src={userProfile?.photoURL || user.photoURL || ''} alt="Profile" className="avatar !w-10 !h-10 flex-shrink-0 object-cover" />
+              ) : (
+                <span className="avatar !w-10 !h-10 !text-sm flex-shrink-0">{((userProfile?.displayName || user.displayName || user.email || 'U').charAt(0)).toUpperCase()}</span>
+              )}
+              {userProfile?.displayName || user.displayName || user.email?.split('@')[0]}
+            </Link>
+            <button onClick={handleLogout} className="text-[#768078] hover:text-[#304936] text-left text-[16px] font-medium flex items-center gap-3">
+              <LogOut size={18} /> Log out
+            </button>
           </div>
-        </>
-      )}
+        ) : (
+          <div className="flex flex-col gap-4 mt-auto pb-6">
+            <Link href="/login" className="text-[16px] font-medium text-[#768078] text-center w-full py-3">Sign in</Link>
+            <Link href="/signup" className="bg-[#304936] text-white py-4 px-4 rounded-[4px] text-center text-[14px] font-bold tracking-[0.05em] uppercase w-full shadow-lg">Join the community</Link>
+          </div>
+        )}
+      </div>
     </header>
   )
 }

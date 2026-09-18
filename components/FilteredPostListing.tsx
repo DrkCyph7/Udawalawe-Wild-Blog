@@ -83,7 +83,7 @@ export function FilteredPostListing({ initialPosts, currentSort, headerLeft, emp
               placeholder="Search stories..."
               value={query}
               onChange={handleChange}
-              className="w-full pl-9 pr-4 py-2 rounded-full border border-[#d8d5ca] text-sm focus:outline-none focus:border-[#304936] text-[#2a3c30] placeholder:text-[#768078] bg-white transition-colors"
+              className="w-full !pl-10 !pr-4 !py-2.5 !mt-0 rounded-full border border-[#d8d5ca] text-sm focus:outline-none focus:border-[#304936] text-[#2a3c30] placeholder:text-[#768078] bg-white transition-colors"
             />
           </div>
           <SortControl currentSort={currentSort} />
