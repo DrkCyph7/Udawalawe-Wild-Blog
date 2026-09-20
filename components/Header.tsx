@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, Menu, LogOut, X } from 'lucide-react'
+import { Search, Menu, LogOut, X, Home, Compass, BookOpen, PenLine, Shield, Calendar } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { onAuthStateChanged, signOut, User } from 'firebase/auth'
 import { auth, db } from '@/lib/firebase'
@@ -70,22 +70,26 @@ export function Header() {
   }
 
   return (
-    <header className="site-header">
-      <div className="nav-wrap relative">
-        <Link href="/" className="brand">
-          <span className="brand-mark">
-            <Image src="/blog/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
-          </span>
-          <span>UDAWALAWE<br/><em>WILD</em></span>
-        </Link>
+    <>
+      <div className="site-header-wrapper">
+        <header className="site-header">
+        <div className="nav-wrap relative">
+          <a href="https://udawalawe-wild.com/" className="brand flex items-center">
+            <Image src="/blog/logo-black.png" alt="Udawalawe Wild" width={180} height={48} className="h-8 md:h-10 w-auto object-contain" />
+          </a>
         <nav>
-          <Link href="/" className={pathname === '/' ? 'active' : ''}>Stories</Link>
-          <Link href="/new" className={pathname === '/new' ? 'active' : ''}>Share a story</Link>
+          <a href="https://udawalawe-wild.com/" className="flex items-center gap-1.5"><Home size={14}/> Home</a>
+          <a href="https://udawalawe-wild.com/safaris" className="flex items-center gap-1.5"><Compass size={14}/> Safaris</a>
+          <Link href="/" className={`flex items-center gap-1.5 ${pathname === '/' ? 'active' : ''}`}><BookOpen size={14}/> Blog</Link>
+          <Link href="/new" className={`flex items-center gap-1.5 ${pathname === '/new' ? 'active' : ''}`}><PenLine size={14}/> Share a story</Link>
           {isAdmin && (
-            <Link href="/admin" className={pathname === '/admin' ? 'active' : ''}>Admin</Link>
+            <Link href="/admin" className={`flex items-center gap-1.5 ${pathname === '/admin' ? 'active' : ''}`}><Shield size={14}/> Admin</Link>
           )}
         </nav>
         <div className="nav-actions">
+          <a href="https://udawalawe-wild.com/book" className="hidden lg:flex items-center gap-2 bg-[#c29d5f] hover:bg-[#b08d55] text-white px-4 py-2.5 rounded-full text-[12px] font-bold tracking-[0.03em] transition-colors">
+            <Calendar size={14}/> Plan my safari
+          </a>
           {user ? (
             <div className="hidden md:flex items-center gap-3">
               <Link href={`/profile/${user.uid}`} className="nav-profile-link">
@@ -113,10 +117,12 @@ export function Header() {
           >
             {isMenuOpen ? <X size={20}/> : <Menu size={20}/>}
           </button>
+          </div>
         </div>
-      </div>
+      </header>
+    </div>
 
-      {/* Next Level Mobile Nav Drawer */}
+    {/* Next Level Mobile Nav Drawer */}
       <div 
         className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         onClick={() => setIsMenuOpen(false)} 
@@ -125,9 +131,9 @@ export function Header() {
         className={`fixed top-0 right-0 h-full w-[85%] max-w-[340px] bg-[#f7f5ef] shadow-2xl flex flex-col px-8 py-10 gap-8 md:hidden z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex justify-between items-center mb-4">
-          <span className="brand-mark">
-            <Image src="/blog/logo.png" alt="Logo" width={24} height={24} className="object-contain" />
-          </span>
+          <a href="https://udawalawe-wild.com/">
+            <Image src="/blog/logo-black.png" alt="Udawalawe Wild" width={140} height={36} className="h-7 w-auto object-contain" />
+          </a>
           <button 
             className="text-[#768078] hover:text-[#304936] transition-colors p-2 -mr-2"
             onClick={() => setIsMenuOpen(false)}
@@ -137,10 +143,13 @@ export function Header() {
         </div>
 
         <div className="flex flex-col gap-6">
-          <Link href="/" className={`text-xl font-serif ${pathname === '/' ? 'text-[#304936]' : 'text-[#768078]'}`}>Stories</Link>
-          <Link href="/new" className={`text-xl font-serif ${pathname === '/new' ? 'text-[#304936]' : 'text-[#768078]'}`}>Share a story</Link>
+          <a href="https://udawalawe-wild.com/" className="flex items-center gap-3 text-xl font-serif text-[#768078]"><Home size={20}/> Main Site</a>
+          <a href="https://udawalawe-wild.com/safaris" className="flex items-center gap-3 text-xl font-serif text-[#768078]"><Compass size={20}/> Safaris</a>
+          <a href="https://udawalawe-wild.com/book" className="flex items-center gap-3 text-xl font-serif text-[#c29d5f] font-bold"><Calendar size={20}/> Plan my safari</a>
+          <Link href="/" className={`flex items-center gap-3 text-xl font-serif ${pathname === '/' ? 'text-[#304936]' : 'text-[#768078]'}`}><BookOpen size={20}/> Blog Stories</Link>
+          <Link href="/new" className={`flex items-center gap-3 text-xl font-serif ${pathname === '/new' ? 'text-[#304936]' : 'text-[#768078]'}`}><PenLine size={20}/> Share a story</Link>
           {isAdmin && (
-            <Link href="/admin" className={`text-xl font-serif ${pathname === '/admin' ? 'text-[#304936]' : 'text-[#768078]'}`}>Admin</Link>
+            <Link href="/admin" className={`flex items-center gap-3 text-xl font-serif ${pathname === '/admin' ? 'text-[#304936]' : 'text-[#768078]'}`}><Shield size={20}/> Admin</Link>
           )}
         </div>
         
@@ -167,6 +176,6 @@ export function Header() {
           </div>
         )}
       </div>
-    </header>
+    </>
   )
 }
