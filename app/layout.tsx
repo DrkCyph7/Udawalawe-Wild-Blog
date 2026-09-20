@@ -24,9 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-scroll-behavior="smooth">
-      <body className="antialiased">
+      <body className="antialiased min-h-screen flex flex-col">
         <Header />
-        {children}
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
         <Footer />
         <Analytics />
       </body>
