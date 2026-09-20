@@ -70,8 +70,9 @@ export function Header() {
   }
 
   return (
-    <header className="site-header">
-      <div className="nav-wrap relative">
+    <>
+      <header className="site-header">
+        <div className="nav-wrap relative">
         <a href="https://udawalawe-wild.com/" className="brand flex items-center">
           <Image src="/blog/logo-black.png" alt="Udawalawe Wild" width={180} height={48} className="h-8 md:h-10 w-auto object-contain" />
         </a>
@@ -117,6 +118,7 @@ export function Header() {
           </button>
         </div>
       </div>
+      </header>
 
       {/* Next Level Mobile Nav Drawer */}
       <div 
@@ -172,6 +174,6 @@ export function Header() {
           </div>
         )}
       </div>
-    </header>
+    </>
   )
 }
