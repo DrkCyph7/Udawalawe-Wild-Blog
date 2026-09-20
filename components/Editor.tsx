@@ -11,17 +11,19 @@ interface EditorProps {
   onChange: (content: string) => void;
 }
 
+const extensions = [
+  StarterKit,
+  Link.configure({
+    openOnClick: false,
+    HTMLAttributes: {
+      class: 'text-primary underline cursor-pointer',
+    },
+  }),
+]
+
 export function Editor({ content, onChange }: EditorProps) {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary underline cursor-pointer',
-        },
-      }),
-    ],
+    extensions,
     content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
