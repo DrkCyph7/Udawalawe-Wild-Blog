@@ -8,7 +8,7 @@ import { callSubmitPost } from '@/lib/functions'
 import { Editor } from '@/components/Editor'
 import { ImageUpload } from '@/components/ImageUpload'
 import { StarRating } from '@/components/StarRating'
-import { ChevronLeft, Send, Lock, Globe, EyeOff, X, Tag } from 'lucide-react'
+import { ChevronLeft, Send, Lock, Globe, EyeOff, X, Tag, PenLine } from 'lucide-react'
 import Link from 'next/link'
 
 type PostType = 'Blog Post' | 'Review'
@@ -125,6 +125,41 @@ export default function NewStory() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <main className="new-page flex items-center justify-center min-h-[60vh]">
+        <div className="w-6 h-6 border-2 border-[#304936]/30 border-t-[#304936] rounded-full animate-spin" />
+      </main>
+    )
+  }
+
+  if (!user) {
+    return (
+      <main className="new-page">
+        <div className="new-top">
+          <Link href="/" className="back-link !inline-flex items-center"><ChevronLeft size={16}/> Back</Link>
+        </div>
+        <div className="flex flex-col items-center justify-center text-center mt-12 md:mt-24 max-w-lg mx-auto px-4">
+          <div className="w-16 h-16 bg-[#e9e5d9] text-[#304936] rounded-full flex items-center justify-center mb-6">
+            <PenLine size={28} strokeWidth={1.5} />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif text-[#324b37] mb-4">Share your wild stories.</h1>
+          <p className="text-[#526356] text-[15px] leading-relaxed mb-8">
+            Join the Udawalawe Wild community to publish your journal entries, share your wildlife photography, and review the destinations you&apos;ve visited.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <Link href="/login?redirect=/new" className="dark-button w-full sm:w-auto !inline-flex justify-center border-0 px-8 py-3.5 shadow-sm hover:shadow-md transition-shadow">
+              Sign In
+            </Link>
+            <Link href="/signup?redirect=/new" className="w-full sm:w-auto px-8 py-3.5 text-[#304936] font-bold text-[13px] tracking-[0.06em] uppercase hover:bg-[#e9e5d9] rounded transition-colors text-center">
+              Create an Account
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="new-page">
       <div className="new-top">
@@ -133,17 +168,6 @@ export default function NewStory() {
       </div>
 
       <form onSubmit={handleSubmit} className="new-inner relative">
-        {!authLoading && !user && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#fbfaf6]/90 backdrop-blur-sm border border-[#d8d5ca] p-6 text-center">
-            <Lock size={32} className="mb-4 text-[#304936]" />
-            <h2 className="text-xl font-serif text-[#324b37] mb-2">Sign in to continue</h2>
-            <p className="text-sm text-[#526356] mb-6">Your draft is preserved. Sign in to submit your story.</p>
-            <Link href="/login?redirect=/new" className="dark-button !inline-flex items-center gap-2 border-0">
-              Go to Sign In
-            </Link>
-          </div>
-        )}
-
         <p className="eyebrow">Contribute to the journal</p>
         <h1>Tell us what<br/><i>you saw.</i></h1>
 
