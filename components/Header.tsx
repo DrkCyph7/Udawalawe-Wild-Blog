@@ -211,29 +211,24 @@ export function Header() {
         </div>
 
         {/* Navigation links */}
-        <nav className="flex flex-col gap-1" aria-label="Mobile navigation">
-          {[
-            { href: 'https://udawalawe-wild.com/', label: 'Home', icon: <Home size={18} strokeWidth={1.75} />, external: true },
-            { href: 'https://udawalawe-wild.com/safaris', label: 'Safaris', icon: <Compass size={18} strokeWidth={1.75} />, external: true },
-            { href: '/', label: 'Blog Stories', icon: <BookOpen size={18} strokeWidth={1.75} />, external: false },
-            { href: '/new', label: 'Share a story', icon: <PenLine size={18} strokeWidth={1.75} />, external: false },
-            ...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: <Shield size={18} strokeWidth={1.75} />, external: false }] : []),
-          ].map((item, i) => {
-            const isActive = !item.external && pathname === item.href
-            const cls = `drawer-nav-link flex items-center gap-3.5 py-3.5 text-[16px] font-serif rounded-lg px-3 -mx-3 transition-all duration-200 ${
-              isMenuOpen ? 'drawer-item-visible' : ''
-            } ${isActive ? 'active text-[#304936]' : 'text-[#768078] hover:text-[#304936]'}`
-            const delay = `${0.05 + i * 0.06}s`
-            return item.external ? (
-              <a key={item.href} href={item.href} className={cls} style={{ animationDelay: delay }}>
-                {item.icon} {item.label}
-              </a>
-            ) : (
-              <Link key={item.href} href={item.href} className={cls} style={{ animationDelay: delay }}>
-                {item.icon} {item.label}
-              </Link>
-            )
-          })}
+        <nav className="flex flex-col" aria-label="Mobile navigation">
+          <a href="https://udawalawe-wild.com/" className="flex items-center gap-3.5 py-3.5 px-3 -mx-3 text-[16px] font-serif text-[#768078] hover:text-[#304936] hover:bg-[#f0ede4] rounded-lg transition-colors">
+            <Home size={18} strokeWidth={1.75} /> Home
+          </a>
+          <a href="https://udawalawe-wild.com/safaris" className="flex items-center gap-3.5 py-3.5 px-3 -mx-3 text-[16px] font-serif text-[#768078] hover:text-[#304936] hover:bg-[#f0ede4] rounded-lg transition-colors">
+            <Compass size={18} strokeWidth={1.75} /> Safaris
+          </a>
+          <Link href="/" className={`flex items-center gap-3.5 py-3.5 px-3 -mx-3 text-[16px] font-serif hover:bg-[#f0ede4] rounded-lg transition-colors ${pathname === '/' ? 'text-[#304936] font-semibold' : 'text-[#768078] hover:text-[#304936]'}`}>
+            <BookOpen size={18} strokeWidth={1.75} /> Blog Stories
+          </Link>
+          <Link href="/new" className={`flex items-center gap-3.5 py-3.5 px-3 -mx-3 text-[16px] font-serif hover:bg-[#f0ede4] rounded-lg transition-colors ${pathname === '/new' ? 'text-[#304936] font-semibold' : 'text-[#768078] hover:text-[#304936]'}`}>
+            <PenLine size={18} strokeWidth={1.75} /> Share a story
+          </Link>
+          {isAdmin && (
+            <Link href="/admin" className={`flex items-center gap-3.5 py-3.5 px-3 -mx-3 text-[16px] font-serif hover:bg-[#f0ede4] rounded-lg transition-colors ${pathname === '/admin' ? 'text-[#304936] font-semibold' : 'text-[#768078] hover:text-[#304936]'}`}>
+              <Shield size={18} strokeWidth={1.75} /> Admin
+            </Link>
+          )}
         </nav>
 
         {/* Bottom section — pushed to bottom */}
