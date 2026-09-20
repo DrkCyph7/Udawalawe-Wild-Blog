@@ -57,8 +57,6 @@ footer { max-width:1240px; padding:26px 32px; margin:auto; display:flex; justify
   .featured-card .image-button img { min-height:0; height:250px; }
   .join-banner { margin-top:55px; padding:30px; display:block; }
   .join-banner > p { margin:25px 0; }
-  footer { padding:25px 20px; gap:10px; flex-wrap:wrap; }
-  footer span:last-child { display:none; }
   .post-detail,.new-page,.admin-page { padding:35px 20px 65px; }
   .detail-header { display:flex; flex-direction:column; gap:35px; padding:55px 0; align-items:stretch; }
   .detail-header h1 { font-size:50px; }

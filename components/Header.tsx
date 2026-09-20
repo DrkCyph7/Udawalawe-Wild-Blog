@@ -180,7 +180,7 @@ export function Header() {
       {/* Backdrop */}
       <div
         aria-hidden="true"
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] z-[110] md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[3px] z-[110] transition-opacity duration-300 ${
           isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMenuOpen(false)}
@@ -192,7 +192,7 @@ export function Header() {
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`fixed top-0 right-0 h-full w-[82%] max-w-[320px] bg-[#f7f5ef] shadow-2xl flex flex-col px-7 pt-8 pb-8 md:hidden z-[120] transform transition-transform duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)] overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full w-[82%] max-w-[320px] bg-[#f7f5ef] shadow-2xl flex flex-col px-7 pt-8 pb-8 z-[120] transform transition-transform duration-[320ms] ease-[cubic-bezier(.22,1,.36,1)] overflow-y-auto ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
