@@ -70,13 +70,11 @@ export function Header() {
   }
 
   return (
-    <>
-      <div className="site-header-wrapper">
-        <header className="site-header">
-        <div className="nav-wrap relative">
-          <a href="https://udawalawe-wild.com/" className="brand flex items-center">
-            <Image src="/blog/logo-black.png" alt="Udawalawe Wild" width={180} height={48} className="h-8 md:h-10 w-auto object-contain" />
-          </a>
+    <header className="site-header">
+      <div className="nav-wrap relative">
+        <a href="https://udawalawe-wild.com/" className="brand flex items-center">
+          <Image src="/blog/logo-black.png" alt="Udawalawe Wild" width={180} height={48} className="h-8 md:h-10 w-auto object-contain" />
+        </a>
         <nav>
           <a href="https://udawalawe-wild.com/" className="flex items-center gap-1.5"><Home size={14}/> Home</a>
           <a href="https://udawalawe-wild.com/safaris" className="flex items-center gap-1.5"><Compass size={14}/> Safaris</a>
@@ -117,12 +115,10 @@ export function Header() {
           >
             {isMenuOpen ? <X size={20}/> : <Menu size={20}/>}
           </button>
-          </div>
         </div>
-      </header>
-    </div>
+      </div>
 
-    {/* Next Level Mobile Nav Drawer */}
+      {/* Next Level Mobile Nav Drawer */}
       <div 
         className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         onClick={() => setIsMenuOpen(false)} 
@@ -176,6 +172,6 @@ export function Header() {
           </div>
         )}
       </div>
-    </>
+    </header>
   )
 }
