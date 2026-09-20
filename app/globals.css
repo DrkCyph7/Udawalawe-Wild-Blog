@@ -15,13 +15,13 @@ button { cursor:pointer; }
 .brand { background:none; border:0; display:flex; align-items:center; gap:10px; text-align:left; color:var(--forest); font-weight:700; letter-spacing:.13em; font-size:11px; line-height:1.15; }
 .brand em { font-style:normal; font-weight:400; letter-spacing:.3em; }
 .brand-mark { width:32px; height:32px; border:1px solid var(--moss); border-radius:50%; display:grid; place-items:center; color:var(--moss); }
-nav { display:flex; gap:32px; margin-left:auto; }
-nav a, nav button, .text-link { position:relative; border:0; background:none; color:var(--muted); font-size:12.5px; font-weight:500; letter-spacing:.01em; padding:8px 0; text-decoration:none; transition:color .22s ease; }
-nav a::after, nav button::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:var(--gold); border-radius:2px; transition:width .25s cubic-bezier(.4,0,.2,1); }
-nav a:hover, nav button:hover, .text-link:hover { color:var(--forest); }
-nav a:hover::after, nav button:hover::after { width:100%; }
-nav a.active, nav button.active { color:var(--forest); font-weight:600; }
-nav a.active::after, nav button.active::after { width:100%; background:var(--gold); }
+.site-header nav { display:flex; gap:32px; margin-left:auto; }
+.site-header nav a, .site-header nav button, .text-link { position:relative; border:0; background:none; color:var(--muted); font-size:12.5px; font-weight:500; letter-spacing:.01em; padding:8px 0; text-decoration:none; transition:color .22s ease; }
+.site-header nav a::after, .site-header nav button::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:1.5px; background:var(--gold); border-radius:2px; transition:width .25s cubic-bezier(.4,0,.2,1); }
+.site-header nav a:hover, .site-header nav button:hover, .text-link:hover { color:var(--forest); }
+.site-header nav a:hover::after, .site-header nav button:hover::after { width:100%; }
+.site-header nav a.active, .site-header nav button.active { color:var(--forest); font-weight:600; }
+.site-header nav a.active::after, .site-header nav button.active::after { width:100%; background:var(--gold); }
 .nav-actions { display:flex; align-items:center; gap:16px; }
 .icon-button { border:0; background:none; color:var(--forest); display:grid; place-items:center; }
 .menu-button { display:none; border:0; background:none; color:var(--forest); width:44px; height:44px; display:none; place-items:center; justify-content:center; border-radius:8px; transition:background .2s ease; -webkit-tap-highlight-color:transparent; }
@@ -42,7 +42,7 @@ footer { max-width:1240px; padding:26px 32px; margin:auto; display:flex; justify
 @media (max-width:800px) {
   .site-header { height:60px; }
   .nav-wrap { padding:0 16px; }
-  nav, .nav-actions .text-link, .nav-actions .pill-button { display:none; }
+  .site-header nav, .nav-actions .text-link, .nav-actions .pill-button { display:none; }
   .menu-button { display:flex !important; }
   .hero { display:flex; flex-direction:column; padding:55px 20px 65px; gap:45px; align-items:stretch; text-align:center; }
   .hero-copy { margin-left:auto; margin-right:auto; }
@@ -141,22 +141,21 @@ footer { max-width:1240px; padding:26px 32px; margin:auto; display:flex; justify
 
 /* ── Navbar Animations & Micro-interactions ─────────────────────── */
 
-/* Drawer item stagger entrance — only fires when .drawer-item-visible is added */
+/* Drawer item stagger entrance — transform only, no opacity (avoids invisible items bug) */
 @keyframes drawerItemIn {
-  from { opacity:0; transform:translateX(14px); }
-  to   { opacity:1; transform:translateX(0); }
+  from { transform:translateX(14px); }
+  to   { transform:translateX(0); }
 }
-/* Default state: visible, no animation (drawer closed) */
+/* Default state: always visible */
 .drawer-nav-link { opacity:1; transition:padding-left .2s ease, color .2s ease; }
-/* When drawer opens, add this class to replay the entrance animation */
-.drawer-item-visible { animation:drawerItemIn .28s cubic-bezier(.22,1,.36,1) both; }
-/* Stagger via nth-child — works because all items are direct children of the nav */
-.drawer-nav-link:nth-child(1).drawer-item-visible { animation-delay:.05s; }
-.drawer-nav-link:nth-child(2).drawer-item-visible { animation-delay:.10s; }
-.drawer-nav-link:nth-child(3).drawer-item-visible { animation-delay:.15s; }
-.drawer-nav-link:nth-child(4).drawer-item-visible { animation-delay:.20s; }
-.drawer-nav-link:nth-child(5).drawer-item-visible { animation-delay:.24s; }
-.drawer-nav-link:nth-child(6).drawer-item-visible { animation-delay:.28s; }
+/* Entrance animation fires when drawer opens */
+.drawer-item-visible { animation:drawerItemIn .28s cubic-bezier(.22,1,.36,1) forwards; }
+.drawer-nav-link:nth-child(1).drawer-item-visible { animation-delay:.04s; }
+.drawer-nav-link:nth-child(2).drawer-item-visible { animation-delay:.09s; }
+.drawer-nav-link:nth-child(3).drawer-item-visible { animation-delay:.14s; }
+.drawer-nav-link:nth-child(4).drawer-item-visible { animation-delay:.19s; }
+.drawer-nav-link:nth-child(5).drawer-item-visible { animation-delay:.23s; }
+.drawer-nav-link:nth-child(6).drawer-item-visible { animation-delay:.27s; }
 
 /* Mobile nav link hover indent */
 .drawer-nav-link:hover { padding-left:6px; }
