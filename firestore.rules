@@ -10,7 +10,7 @@ service cloud.firestore {
     // Admin is enforced via existence of a document in the admins collection
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.uid == 'hYgSo3Q4LNf317sChN8pUtMlvvE3' ||
+        request.auth.uid == 'Vw5CzGaJUZWrstZf0rNwMhmA33d2' ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
