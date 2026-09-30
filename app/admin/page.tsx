@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { collection, query, where, getDocs, getDoc, onSnapshot, doc } from 'firebase/firestore'
+import { collection, query, where, getDocs, getDoc, onSnapshot, doc, Timestamp } from 'firebase/firestore'
 import { db, auth } from '@/lib/firebase'
 import { onAuthStateChanged, User } from 'firebase/auth'
 import { callAdminModeratePost, callAdminDeletePost, callAdminUpdatePost } from '@/lib/functions'
@@ -92,7 +92,8 @@ export default function BlogQueue() {
       }
       const snap = await getDocs(q)
       const fetched = snap.docs.map(d => ({ id: d.id, ...d.data() })) as BlogPost[]
-      fetched.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      const toMs = (v: any) => v instanceof Timestamp ? v.toDate().getTime() : v ? new Date(v).getTime() : 0
+      fetched.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt))
       setPosts(fetched)
     } catch (e) {
       console.error(e)
@@ -228,9 +229,8 @@ export default function BlogQueue() {
           posts.map(post => {
             const hasPendingEdit = !!post.pendingEdit
             const displayName = post.isAnonymous ? `Anonymous (real: ${post.authorName})` : post.authorName
-            const dateStr = post.createdAt
-              ? new Date(post.createdAt).toLocaleDateString()
-              : '—'
+            const toDate = (v: any) => v instanceof Timestamp ? v.toDate() : v ? new Date(v) : null
+            const dateStr = toDate(post.createdAt)?.toLocaleDateString() ?? '—'
 
             return (
               <div key={post.id} className={`queue-row flex-col items-start gap-4 ${hasPendingEdit ? 'has-edit' : ''}`}>

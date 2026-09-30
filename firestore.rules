@@ -148,9 +148,11 @@ service cloud.firestore {
       let isCreating = resource == null;
       let diff = isCreating ? request.resource.data.keys() : request.resource.data.diff(resource.data).affectedKeys();
       let onlyPendingCount = diff.hasOnly(['pendingCount']);
+      let onlyReportedCount = diff.hasOnly(['reportedCount']);
       let validCreation = isCreating && request.resource.data.pendingCount == 1;
       let validChange = !isCreating && request.resource.data.pendingCount == resource.data.pendingCount + 1;
-      return onlyPendingCount && (validCreation || validChange);
+      let validReportedIncrement = !isCreating && onlyReportedCount && request.resource.data.reportedCount == resource.data.reportedCount + 1;
+      return (onlyPendingCount && (validCreation || validChange)) || validReportedIncrement;
     }
   }
 }
